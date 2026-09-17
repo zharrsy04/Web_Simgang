@@ -1,0 +1,384 @@
+================================================================================
+LAPORAN IMPLEMENTASI: TAMPILAN NILAI TUGAS DI HALAMAN PENILAIAN SISWA
+================================================================================
+Tanggal: 11 Agustus 2026
+Project: SIMGANG - Sistem Informasi Magang Diskominfo Cilacap
+Environment: http://127.0.0.1:8000
+
+================================================================================
+RINGKASAN IMPLEMENTASI
+================================================================================
+
+FITUR YANG DIIMPLEMENTASIKAN:
+✅ Section "Nilai Tugas Harian" ditambahkan di halaman Penilaian siswa
+✅ Menampilkan daftar tugas yang sudah dinilai mentor
+✅ Informasi lengkap: judul, mentor, nilai, tanggal
+✅ Feedback mentor ditampilkan (jika ada)
+✅ Rata-rata nilai tugas dihitung dan ditampilkan
+✅ Badge warna untuk nilai (A/B/C/D)
+✅ Pesan "Belum ada tugas yang dinilai" jika belum ada data
+✅ Section terpisah dari Nilai Akhir PKL (tidak dicampur)
+
+================================================================================
+FILE YANG DIUBAH
+================================================================================
+
+1. app/Http/Controllers/PenilaianController.php
+   METHOD: detailNilai($id)
+   PERUBAHAN:
+   - ✅ Ditambahkan query untuk mengambil tugas yang sudah dinilai
+   - ✅ Query: TaskSubmission dengan status 'graded' dan grade not null
+   - ✅ Include relasi: task.assignedByUser, student
+   - ✅ Diurutkan berdasarkan graded_at descending (terbaru di atas)
+   - ✅ Data dikirim ke view sebagai variable $gradedTasks
+
+2. resources/views/penilaian/shownilai.blade.php
+   PERUBAHAN:
+   - ✅ Ditambahkan section "Nilai Tugas Harian" sebelum "Kategori Penilaian"
+   - ✅ Tabel dengan kolom: No, Judul Tugas, Mentor, Nilai, Tgl Dikumpulkan, Tgl Dinilai
+   - ✅ Badge nilai dengan warna sesuai grade (A=hijau, B=biru, C=kuning, D=merah)
+   - ✅ Feedback mentor ditampilkan di bawah judul tugas (jika pendek)
+   - ✅ Feedback panjang ditampilkan di row terpisah dengan styling khusus
+   - ✅ Summary row untuk rata-rata nilai tugas
+   - ✅ Empty state dengan icon dan pesan jika belum ada tugas dinilai
+   - ✅ Styling konsisten dengan section Nilai PKL yang sudah ada
+
+================================================================================
+STRUKTUR DATA YANG DITAMPILKAN
+================================================================================
+
+DATA DARI QUERY:
+$gradedTasks = TaskSubmission dengan kondisi:
+- Task terkait dengan sertifikat siswa (sertifikat_pkl_id = $id)
+- Status = 'graded'
+- Grade tidak null (sudah ada nilai)
+- Relasi loaded: task.assignedByUser, student
+- Urutan: graded_at DESC (terbaru dulu)
+
+KOLOM YANG DITAMPILKAN:
+1. No                     → Loop iteration
+2. Judul Tugas            → $submission->task->title
+3. Mentor Pemberi Tugas   → $submission->task->assignedByUser->nama
+4. Nilai                  → $submission->grade (dengan badge warna)
+5. Tanggal Dikumpulkan    → $submission->submitted_at
+6. Tanggal Dinilai        → $submission->graded_at
+
+INFORMASI TAMBAHAN:
+- Feedback Mentor         → $submission->mentor_feedback (ditampilkan jika ada)
+- Rata-rata Nilai         → $gradedTasks->avg('grade')
+
+================================================================================
+TAMPILAN FITUR
+================================================================================
+
+SECTION "NILAI TUGAS HARIAN":
+┌─────────────────────────────────────────────────────────────────┐
+│ 📋 Nilai Tugas Harian                                           │
+├─────────────────────────────────────────────────────────────────┤
+│ ┌──┬─────────────┬─────────┬───────┬──────────┬──────────┐    │
+│ │No│Judul Tugas  │Mentor   │Nilai  │Dikumpul. │Dinilai   │    │
+│ ├──┼─────────────┼─────────┼───────┼──────────┼──────────┤    │
+│ │1 │Task A       │Budi     │[85]   │10 Aug    │11 Aug    │    │
+│ │  │💬 Bagus!    │         │       │          │          │    │
+│ ├──┼─────────────┼─────────┼───────┼──────────┼──────────┤    │
+│ │2 │Task B       │Ani      │[90]   │09 Aug    │10 Aug    │    │
+│ └──┴─────────────┴─────────┴───────┴──────────┴──────────┘    │
+│                                                                 │
+│ RATA-RATA NILAI TUGAS: 87.50                                   │
+└─────────────────────────────────────────────────────────────────┘
+
+EMPTY STATE (jika belum ada tugas dinilai):
+┌─────────────────────────────────────────────────────────────────┐
+│ 📋 Nilai Tugas Harian                                           │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│                          📭                                      │
+│                                                                 │
+│              Belum ada tugas yang dinilai                       │
+│                                                                 │
+│    Tugas yang sudah dinilai oleh mentor akan muncul di sini    │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+
+BADGE NILAI:
+- Nilai 90-100  → Badge hijau   (A - Sangat Baik)
+- Nilai 75-89   → Badge biru    (B - Baik)
+- Nilai 60-74   → Badge kuning  (C - Cukup)
+- Nilai 0-59    → Badge merah   (D - Kurang)
+
+FEEDBACK MENTOR:
+- Feedback pendek (≤80 karakter): Ditampilkan di bawah judul tugas
+- Feedback panjang (>80 karakter): Ditampilkan di row terpisah dengan box khusus
+
+================================================================================
+LOKASI HALAMAN
+================================================================================
+
+URL AKSES:
+http://127.0.0.1:8000/siswa/{id_sertifikat}/nilai
+
+NAVIGASI:
+1. Login sebagai siswa
+2. Klik menu "Penilaian" di sidebar
+3. Halaman akan menampilkan:
+   - Header: Daftar Nilai Praktik Kerja Lapangan
+   - Quick Stats: Rata-rata nilai PKL, Grade akhir, Jumlah aspek
+   - Informasi Siswa: Nama, NIS, Jurusan, Sekolah
+   - Detail Penilaian: Nilai PKL (yang sudah ada sebelumnya)
+   - **NILAI TUGAS HARIAN: Section baru yang ditambahkan**
+   - Kategori Penilaian: Legend grade A/B/C/D
+
+================================================================================
+PERBEDAAN ANTARA DUA SISTEM PENILAIAN
+================================================================================
+
+SECTION 1: DETAIL PENILAIAN (Nilai Akhir PKL) - SUDAH ADA SEBELUMNYA
+├── Icon: 📋 Clipboard
+├── Data: Tabel tbl_penilaian
+├── Kolom: No, Aspek yang dinilai, Nilai, Keterangan, Aksi
+├── Contoh aspek: Kedisiplinan, Kerjasama, Inisiatif, dll
+├── Nilai: Per aspek (bisa berbeda-beda)
+├── Rata-rata: Ditampilkan di Quick Stats di atas
+└── Fungsi: Evaluasi keseluruhan PKL oleh mentor pembimbing
+
+SECTION 2: NILAI TUGAS HARIAN - BARU DITAMBAHKAN
+├── Icon: ✅ Tasks
+├── Data: Tabel task_submissions
+├── Kolom: No, Judul Tugas, Mentor, Nilai, Tgl Dikumpulkan, Tgl Dinilai
+├── Contoh: "Membuat Dashboard", "Analisis Data", dll
+├── Nilai: Per tugas (0-100)
+├── Rata-rata: Ditampilkan di summary row tabel
+└── Fungsi: Penilaian harian/per assignment oleh mentor pemberi tugas
+
+CATATAN PENTING:
+✅ Kedua section TERPISAH (tidak dicampur)
+✅ Masing-masing punya tabel sendiri
+✅ Masing-masing punya rata-rata sendiri
+✅ Judul section jelas membedakan keduanya
+
+================================================================================
+SKENARIO PENGUJIAN
+================================================================================
+
+SCENARIO 1: Siswa dengan tugas yang sudah dinilai
+LANGKAH:
+1. Login sebagai mentor
+2. Beri nilai untuk minimal 2 tugas siswa
+   - Task 1: Nilai 85, Feedback "Bagus, tingkatkan lagi"
+   - Task 2: Nilai 90, Feedback "Excellent work!"
+3. Logout dari mentor
+4. Login sebagai siswa yang tugasnya dinilai
+5. Klik menu "Penilaian" di sidebar
+
+HASIL YANG DIHARAPKAN:
+✅ Halaman Penilaian terbuka
+✅ Section "Nilai Tugas Harian" muncul
+✅ Tabel menampilkan 2 tugas yang dinilai
+✅ Kolom terisi lengkap:
+   - Judul tugas sesuai
+   - Nama mentor yang memberi tugas
+   - Nilai dengan badge warna (85=biru, 90=hijau)
+   - Tanggal dikumpulkan
+   - Tanggal dinilai
+✅ Feedback mentor tampil di bawah judul tugas
+✅ Rata-rata nilai: 87.50 (ditampilkan di summary row)
+✅ Section "Detail Penilaian" (nilai PKL) tetap ada di atasnya
+
+SCENARIO 2: Siswa belum punya tugas yang dinilai
+LANGKAH:
+1. Login sebagai siswa baru (belum ada tugas dinilai)
+2. Klik menu "Penilaian" di sidebar
+
+HASIL YANG DIHARAPKAN:
+✅ Halaman Penilaian terbuka
+✅ Section "Nilai Tugas Harian" muncul
+✅ Tampil empty state dengan:
+   - Icon inbox (📭)
+   - Pesan "Belum ada tugas yang dinilai"
+   - Subtext "Tugas yang sudah dinilai oleh mentor akan muncul di sini"
+✅ Section "Detail Penilaian" (nilai PKL) tetap ada
+
+SCENARIO 3: Feedback mentor panjang
+LANGKAH:
+1. Login sebagai mentor
+2. Beri nilai dengan feedback panjang (>80 karakter):
+   "Tugas Anda sangat baik. Analisis yang mendalam dan presentasi 
+    yang rapi. Namun perlu ditingkatkan di bagian kesimpulan agar 
+    lebih konkrit dan actionable."
+3. Login sebagai siswa
+4. Buka halaman Penilaian
+
+HASIL YANG DIHARAPKAN:
+✅ Preview feedback (80 karakter pertama) muncul di bawah judul
+✅ Row tambahan muncul di bawah task tersebut
+✅ Feedback lengkap ditampilkan di box dengan styling khusus:
+   - Background biru muda (#f0f9ff)
+   - Border kiri biru (#info)
+   - Icon comment
+   - Label "Feedback Mentor:"
+   - Text feedback lengkap dengan white-space pre-wrap
+
+SCENARIO 4: Multiple mentors
+LANGKAH:
+1. Login sebagai mentor A, beri nilai untuk Task 1
+2. Login sebagai mentor B, beri nilai untuk Task 2
+3. Login sebagai siswa
+4. Buka halaman Penilaian
+
+HASIL YANG DIHARAPKAN:
+✅ Kedua tugas tampil di tabel
+✅ Kolom "Mentor Pemberi Tugas" menampilkan nama berbeda:
+   - Task 1: Mentor A
+   - Task 2: Mentor B
+✅ Rata-rata dihitung dari kedua tugas
+
+================================================================================
+ERROR HANDLING
+================================================================================
+
+ERROR 1: Variable $gradedTasks tidak didefinisikan
+PENYEBAB: Controller tidak mengirim variable ke view
+SOLUSI: ✅ Sudah diperbaiki di PenilaianController::detailNilai()
+
+ERROR 2: Str::limit() not found
+PENYEBAB: Helper Str tidak tersedia di Blade
+SOLUSI: ✅ Menggunakan \Illuminate\Support\Str::limit()
+
+ERROR 3: Relasi task.assignedByUser null
+PENYEBAB: Mentor yang membuat tugas sudah dihapus
+SOLUSI: ✅ Ditambahkan fallback: nama ?? username ?? '-'
+
+ERROR 4: Empty state tidak muncul
+PENYEBAB: Kondisi @if salah
+SOLUSI: ✅ Menggunakan @if($gradedTasks && $gradedTasks->count() > 0)
+
+ERROR 5: Rata-rata tidak muncul
+PENYEBAB: Collection kosong
+SOLUSI: ✅ avg() akan return 0 jika kosong, dan akan dicek di @if di atas
+
+================================================================================
+KONFIRMASI REQUIREMENT
+================================================================================
+
+✅ Section nilai tugas ditambahkan di halaman Penilaian siswa
+   → Implementasi: Card baru dengan title "Nilai Tugas Harian"
+
+✅ Menampilkan daftar tugas yang sudah dinilai
+   → Implementasi: Query TaskSubmission dengan status 'graded'
+
+✅ Informasi yang ditampilkan:
+   ✅ 1. Judul tugas → $submission->task->title
+   ✅ 2. Nama mentor yang memberi tugas → $submission->task->assignedByUser->nama
+   ✅ 3. Nilai yang diberikan → $submission->grade (dengan badge)
+   ✅ 4. Feedback/catatan mentor → $submission->mentor_feedback (jika ada)
+   ✅ 5. Tanggal dikumpulkan → $submission->submitted_at
+   ✅ 6. Tanggal dinilai → $submission->graded_at
+
+✅ Section terpisah dari nilai akhir PKL
+   → Implementasi: Card terpisah dengan judul berbeda
+   → "Detail Penilaian" = Nilai PKL
+   → "Nilai Tugas Harian" = Nilai tugas
+
+✅ Pesan jika belum ada tugas dinilai
+   → Implementasi: Empty state dengan icon dan pesan deskriptif
+
+================================================================================
+RINGKASAN PERUBAHAN SESI INI
+================================================================================
+
+TASK 1 (Prompt sebelumnya):
+✅ Implementasi fitur penilaian tugas oleh mentor
+✅ Tombol "Beri Nilai" di halaman detail tugas mentor
+✅ Modal form untuk input nilai dan feedback
+✅ Validasi nilai 0-100
+✅ Update status submission menjadi 'graded'
+✅ File: MentorTaskController.php, mentor/tasks/show.blade.php
+
+TASK 2 (Prompt ini):
+✅ Implementasi tampilan nilai tugas di halaman Penilaian siswa
+✅ Section "Nilai Tugas Harian" dengan tabel lengkap
+✅ Badge nilai dengan warna berbeda per grade
+✅ Feedback mentor ditampilkan
+✅ Rata-rata nilai tugas dihitung
+✅ Empty state untuk siswa yang belum punya nilai tugas
+✅ File: PenilaianController.php, penilaian/shownilai.blade.php
+
+HASIL KESELURUHAN:
+✅ Flow lengkap: Mentor memberi nilai → Siswa melihat nilai
+✅ Kedua sistem penilaian (PKL & Tugas) terpisah dengan jelas
+✅ UI/UX konsisten dengan design system yang ada
+✅ Responsive dan print-friendly
+✅ Accessibility compliant (focus states, semantic HTML)
+
+================================================================================
+NEXT STEPS (OPSIONAL)
+================================================================================
+
+ENHANCEMENT YANG BISA DIPERTIMBANGKAN:
+- [ ] Export nilai tugas ke PDF (terpisah dari nilai PKL)
+- [ ] Grafik progress nilai tugas (line chart per tugas)
+- [ ] Filter tugas berdasarkan bulan/periode
+- [ ] Notifikasi email saat tugas dinilai
+- [ ] Download sertifikat dengan nilai tugas included
+- [ ] Halaman detail per tugas (full view dengan attachments)
+
+================================================================================
+CATATAN PENTING
+================================================================================
+
+1. KONSISTENSI DESIGN:
+   ✅ Menggunakan variable CSS yang sama (--primary, --info, dll)
+   ✅ Card styling konsisten dengan section lain
+   ✅ Table styling mengikuti template yang ada (navy header, white body)
+   ✅ Badge styling sama dengan grade legend
+
+2. PERFORMANCE:
+   ✅ Eager loading relasi (with(['task.assignedByUser', 'student']))
+   ✅ Query efficient (where conditions clear)
+   ✅ No N+1 problem
+
+3. MAINTAINABILITY:
+   ✅ Code readable dan terstruktur
+   ✅ Naming convention jelas
+   ✅ Comments untuk section penting
+   ✅ Fallback untuk data null
+
+4. USER EXPERIENCE:
+   ✅ Empty state informatif (bukan blank page)
+   ✅ Feedback mentor mudah dibaca
+   ✅ Badge warna intuitif (hijau=bagus, merah=kurang)
+   ✅ Rata-rata nilai jelas terlihat
+
+================================================================================
+CONTACT & SUPPORT
+================================================================================
+
+Jika ada pertanyaan atau menemukan bug:
+1. Cek Laravel log: storage/logs/laravel.log
+2. Cek browser console untuk JavaScript errors
+3. Verifikasi data di database:
+   SELECT * FROM task_submissions WHERE status = 'graded';
+
+================================================================================
+PENUTUP
+================================================================================
+
+Implementasi tampilan nilai tugas di halaman Penilaian siswa TELAH SELESAI.
+
+CHECKLIST FINAL:
+✅ Controller updated (PenilaianController::detailNilai)
+✅ View updated (penilaian/shownilai.blade.php)
+✅ Query data tugas yang dinilai
+✅ Tabel dengan 6 kolom informasi lengkap
+✅ Badge nilai dengan warna berbeda
+✅ Feedback mentor ditampilkan
+✅ Rata-rata nilai dihitung
+✅ Empty state untuk kasus belum ada data
+✅ Section terpisah dari nilai PKL
+✅ Styling konsisten dan responsive
+✅ No diagnostics errors
+
+FITUR SIAP DIUJI:
+Login sebagai siswa → Klik "Penilaian" → Lihat section "Nilai Tugas Harian"
+
+================================================================================

@@ -1,0 +1,190 @@
+═══════════════════════════════════════════════════════════════════════════════
+  PANDUAN TESTING: PERBAIKAN LOGO PDF SERTIFIKAT
+═══════════════════════════════════════════════════════════════════════════════
+
+📋 CHECKLIST TESTING
+═══════════════════════════════════════════════════════════════════════════════
+
+□ TEST 1: Cetak dari Antrian Sertifikat (Sekretariat)
+  URL: http://127.0.0.1:8000/sekretariat/antrian-sertifikat
+  Login sebagai: Sekretariat
+  
+  Langkah:
+  1. Buka halaman Antrian Sertifikat
+  2. Klik tombol "Cetak" (ikon printer hijau) pada salah satu data
+  3. PDF akan terbuka/download
+  
+  Verifikasi:
+  ✓ Logo Kabupaten Cilacap muncul di kiri atas (halaman 1 & 2)
+  ✓ Logo Diskominfo muncul di kanan atas (halaman 1 & 2)
+  ✓ Background watermark "KOMINFO" muncul (halaman 1 & 2)
+  ✓ QR Code muncul di halaman 1
+  ✓ Semua border dan ornamen dekoratif muncul dengan benar
+
+─────────────────────────────────────────────────────────────────────────────
+
+□ TEST 2: Cetak dari Data Siswa/Mahasiswa PKL (Mentor)
+  URL: http://127.0.0.1:8000/mentor
+  Login sebagai: Mentor
+  
+  Langkah:
+  1. Buka halaman Data Siswa/Mahasiswa PKL
+  2. Klik tombol "Cetak" (ikon printer) pada salah satu data
+  3. PDF akan terbuka/download
+  
+  Verifikasi:
+  ✓ Logo Kabupaten Cilacap muncul
+  ✓ Logo Diskominfo muncul
+  ✓ Semua elemen visual tampil sempurna
+
+─────────────────────────────────────────────────────────────────────────────
+
+□ TEST 3: Verifikasi Sertifikat (Public Access via QR Code)
+  URL: http://127.0.0.1:8000/verifikasi/{id_sertifikat}
+  Login: Tidak perlu (public endpoint)
+  
+  Langkah:
+  1. Scan QR Code dari sertifikat fisik, atau
+  2. Akses URL verifikasi langsung (ganti {id_sertifikat} dengan ID valid)
+  3. PDF verifikasi akan terbuka
+  
+  Verifikasi:
+  ✓ Logo muncul di PDF verifikasi
+  ✓ Siswa bisa lihat sertifikat yang valid
+
+─────────────────────────────────────────────────────────────────────────────
+
+□ TEST 4: Preview PDF (PDF Viewer Internal)
+  URL: Dari tombol Preview di berbagai halaman
+  
+  Langkah:
+  1. Cari tombol "Preview" atau "Lihat PDF"
+  2. Klik tombol tersebut
+  3. PDF akan muncul inline di browser (tidak download)
+  
+  Verifikasi:
+  ✓ Logo muncul di preview
+  ✓ Preview berfungsi dengan baik
+
+═══════════════════════════════════════════════════════════════════════════════
+🔍 TROUBLESHOOTING (jika logo masih tidak muncul)
+═══════════════════════════════════════════════════════════════════════════════
+
+MASALAH 1: File gambar tidak ditemukan
+Solusi:
+  1. Verifikasi file ada di: d:\laragon-new\www\web-simgang\public\images\
+     - logo-dinascilacap.png
+     - logo-Diskominfo.png
+     - bg-sertif.png
+  2. Cek permission folder (harus readable oleh PHP/web server)
+  3. Cek case sensitivity nama file (huruf besar/kecil harus sama persis)
+
+─────────────────────────────────────────────────────────────────────────────
+
+MASALAH 2: Path tidak benar
+Solusi:
+  1. Di template, pastikan menggunakan:
+     {{ public_path('images/logo-dinascilacap.png') }}
+     BUKAN:
+     {{ asset('images/logo-dinascilacap.png') }}
+  
+  2. public_path() menghasilkan absolute path:
+     d:\laragon-new\www\web-simgang\public\images\logo-dinascilacap.png
+
+─────────────────────────────────────────────────────────────────────────────
+
+MASALAH 3: DomPDF tidak bisa akses file
+Solusi:
+  1. Pastikan konfigurasi di controller:
+     'chroot' => public_path(),
+  2. Pastikan 'isRemoteEnabled' => false
+  3. Restart server PHP jika perlu: php artisan serve --host=127.0.0.1 --port=8000
+
+─────────────────────────────────────────────────────────────────────────────
+
+MASALAH 4: Cache browser
+Solusi:
+  1. Clear cache browser (Ctrl+Shift+Delete)
+  2. Buka PDF dengan Incognito/Private mode
+  3. Hard refresh (Ctrl+F5) pada halaman yang bersangkutan
+
+═══════════════════════════════════════════════════════════════════════════════
+📊 EXPECTED OUTPUT
+═══════════════════════════════════════════════════════════════════════════════
+
+HALAMAN 1 (Sertifikat):
+┌─────────────────────────────────────────────────────┐
+│ [Logo Cilacap]  PEMERINTAH KABUPATEN CILACAP  [Logo Diskominfo] │
+│         DINAS KOMUNIKASI DAN INFORMATIKA            │
+│                                                     │
+│              S E R T I F I K A T                    │
+│              ────────────────────                   │
+│           NOMOR : XXX/XXX/XXX/2026                 │
+│                                                     │
+│   Diberikan kepada:                                │
+│              [Nama Siswa]                          │
+│              ─────────────                         │
+│                                                     │
+│   [Info Siswa: TTL, NIM, Jurusan, Sekolah]       │
+│                                                     │
+│   [Deskripsi Pelaksanaan PKL]                     │
+│                                                     │
+│   [TTD Kabid]    [QR Code]    [TTD Kadis]         │
+└─────────────────────────────────────────────────────┘
+
+HALAMAN 2 (Daftar Nilai):
+┌─────────────────────────────────────────────────────┐
+│ [Logo Cilacap]  DINAS KOMINFO  [Logo Diskominfo]    │
+│                                                     │
+│           D A F T A R  N I L A I                   │
+│         HASIL PELAKSANAAN PKL                      │
+│              ────────────────                      │
+│                                                     │
+│   [Info Siswa]                                     │
+│                                                     │
+│   ┌───────────────────────────────────┐            │
+│   │ NO │ ASPEK │ NILAI │ KET         │            │
+│   ├───────────────────────────────────┤            │
+│   │ 1  │ XXX   │ XX    │ XXX         │            │
+│   │ 2  │ XXX   │ XX    │ XXX         │            │
+│   └───────────────────────────────────┘            │
+│                                                     │
+│   [Kategori Nilai]    [TTD Pembimbing & Kabid]    │
+└─────────────────────────────────────────────────────┘
+
+═══════════════════════════════════════════════════════════════════════════════
+✅ KRITERIA SUKSES
+═══════════════════════════════════════════════════════════════════════════════
+
+Testing dianggap BERHASIL jika:
+✓ Logo Kabupaten Cilacap muncul dengan jelas (tidak broken/missing)
+✓ Logo Diskominfo muncul dengan jelas
+✓ Background watermark "KOMINFO" muncul (semi-transparan)
+✓ Border dekoratif (triple border: gold-blue-gold) muncul sempurna
+✓ QR Code muncul dan bisa discan
+✓ Font, spacing, layout sesuai desain
+
+Testing dianggap GAGAL jika:
+✗ Logo tidak muncul (kotak kosong/broken image icon)
+✗ Logo ter-stretch atau pecah (buram)
+✗ Background tidak muncul
+✗ Border atau dekorasi hilang
+
+═══════════════════════════════════════════════════════════════════════════════
+📞 JIKA MASIH ADA MASALAH
+═══════════════════════════════════════════════════════════════════════════════
+
+1. Check Laravel log:
+   storage/logs/laravel.log
+   
+2. Check web server error log (Apache/Nginx)
+
+3. Test manual dengan command line:
+   cd d:\laragon-new\www\web-simgang
+   php artisan tinker
+   >>> public_path('images/logo-dinascilacap.png')
+   >>> file_exists(public_path('images/logo-dinascilacap.png'))
+
+4. Buka file PDF_LOGO_FIX_REPORT.txt untuk detail teknis lengkap
+
+═══════════════════════════════════════════════════════════════════════════════

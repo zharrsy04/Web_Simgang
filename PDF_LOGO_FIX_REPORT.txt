@@ -1,0 +1,182 @@
+═══════════════════════════════════════════════════════════════════════════════
+  LAPORAN PERBAIKAN BUG: LOGO TIDAK MUNCUL DI PDF SERTIFIKAT
+═══════════════════════════════════════════════════════════════════════════════
+
+TANGGAL: 6 Agustus 2026
+TASK: Bug Fix #6 - PDF Logo Not Displaying
+
+═══════════════════════════════════════════════════════════════════════════════
+1. DESKRIPSI MASALAH
+═══════════════════════════════════════════════════════════════════════════════
+
+GEJALA:
+- Di halaman Antrian Sertifikat (http://127.0.0.1:8000/sekretariat/antrian-sertifikat)
+- Tombol "Cetak" berhasil membuat PDF sertifikat
+- NAMUN logo-logo tidak muncul di PDF yang dihasilkan:
+  * Logo Kabupaten Cilacap
+  * Logo Dinas Komunikasi dan Informatika (Diskominfo)
+
+FILE GAMBAR:
+✓ File gambar logo EXISTS di: public/images/
+  - logo-dinascilacap.png
+  - logo-Diskominfo.png
+  - bg-sertif.png (background untuk halaman penilaian)
+
+═══════════════════════════════════════════════════════════════════════════════
+2. ROOT CAUSE ANALYSIS
+═══════════════════════════════════════════════════════════════════════════════
+
+PENYEBAB:
+Library DomPDF (yang digunakan untuk generate PDF di project ini) TIDAK BISA 
+mengakses gambar melalui HTTP URL atau path relatif. DomPDF hanya bisa membaca 
+gambar melalui:
+1. Absolute filesystem path (public_path())
+2. Base64 encoded image data
+
+MASALAH DI KODE:
+Template Blade SUDAH BENAR menggunakan public_path():
+  {{ public_path('images/logo-dinascilacap.png') }}
+
+NAMUN konfigurasi DomPDF di Controller SALAH:
+  ❌ 'isRemoteEnabled' => true,     // Mencoba akses via HTTP (GAGAL)
+  ❌ TIDAK ADA 'chroot' setting     // DomPDF tidak tahu base path
+
+═══════════════════════════════════════════════════════════════════════════════
+3. FILE YANG DIPERBAIKI
+═══════════════════════════════════════════════════════════════════════════════
+
+FILE: app/Http/Controllers/SertifikatController.php
+
+METHODS YANG DIPERBAIKI:
+1. cetakPDF()                 (line 538-562)  ← MAIN METHOD dari tombol Cetak
+2. verifikasi()               (line 26-56)
+3. cetakGabungRaw()           (line 1181-1218)
+4. cetakGabungDownload()      (line 1225-1261)
+
+TOTAL: 4 methods diperbaiki
+
+═══════════════════════════════════════════════════════════════════════════════
+4. PERUBAHAN YANG DILAKUKAN
+═══════════════════════════════════════════════════════════════════════════════
+
+SEBELUM (SALAH):
+────────────────
+$pdf->setOptions([
+    'isRemoteEnabled' => true,        ← SALAH: Coba akses via HTTP
+    'isHtml5ParserEnabled' => true
+]);
+
+SESUDAH (BENAR):
+────────────────
+$pdf->setOptions([
+    'isRemoteEnabled' => false,       ← Matikan remote access
+    'isHtml5ParserEnabled' => true,
+    'isPhpEnabled' => true,
+    'chroot' => public_path(),        ← Tetapkan base path untuk akses file lokal
+]);
+
+PENJELASAN:
+- isRemoteEnabled => false:  DomPDF tidak boleh akses gambar via HTTP/URL
+- chroot => public_path():   Memberitahu DomPDF di mana folder public/ berada
+                             sehingga public_path() di template bisa diakses
+
+═══════════════════════════════════════════════════════════════════════════════
+5. TEMPLATE FILES (SUDAH BENAR - TIDAK DIUBAH)
+═══════════════════════════════════════════════════════════════════════════════
+
+Template Blade SUDAH menggunakan public_path() dengan benar:
+
+1. resources/views/mentor/cetak.blade.php
+   - Logo kiri:  {{ public_path('images/logo-dinascilacap.png') }}
+   - Logo kanan: {{ public_path('images/logo-Diskominfo.png') }}
+
+2. resources/views/sertifikat/cetak_gabungan_premium.blade.php
+   - Logo kiri:  {{ public_path('images/logo-dinascilacap.png') }}
+   - Logo kanan: {{ public_path('images/logo-Diskominfo.png') }}
+
+3. resources/views/penilaian/cetak.blade.php
+   - Logo kiri:  {{ public_path('images/logo-dinascilacap.png') }}
+   - Logo kanan: {{ public_path('images/logo-Diskominfo.png') }}
+   - Background: {{ public_path('images/bg-sertif.png') }}
+
+═══════════════════════════════════════════════════════════════════════════════
+6. CARA TESTING
+═══════════════════════════════════════════════════════════════════════════════
+
+LANGKAH-LANGKAH:
+1. Login sebagai role Sekretariat atau Mentor
+2. Buka halaman: http://127.0.0.1:8000/sekretariat/antrian-sertifikat
+3. Pilih salah satu data siswa yang ada di tabel
+4. Klik tombol "Cetak" (ikon printer hijau)
+5. PDF akan terbuka di browser atau download (tergantung setting browser)
+6. VERIFIKASI:
+   ✓ Logo Kabupaten Cilacap MUNCUL di kiri atas halaman 1
+   ✓ Logo Diskominfo MUNCUL di kanan atas halaman 1
+   ✓ Logo Kabupaten Cilacap MUNCUL di header halaman 2 (Daftar Nilai)
+   ✓ Logo Diskominfo MUNCUL di header halaman 2
+   ✓ Background watermark "KOMINFO" muncul (semi-transparan)
+
+ROUTE YANG DIAKSES:
+- Route: mentor.cetak-pdf
+- URL Pattern: /mentor/cetak-pdf/{sertifikat}
+- Controller Method: SertifikatController::cetakPDF()
+
+═══════════════════════════════════════════════════════════════════════════════
+7. IMPACT ANALYSIS
+═══════════════════════════════════════════════════════════════════════════════
+
+METHODS LAIN YANG JUGA DIPERBAIKI (pencegahan):
+- verifikasi() - QR code verification endpoint
+- cetakGabungRaw() - PDF preview (inline viewer)
+- cetakGabungDownload() - Force download PDF
+
+METHODS YANG SUDAH BENAR (tidak diubah):
+✓ cetakGabung()           - Sudah ada chroot setting
+✓ cetakUntukSiswa()       - Sudah ada chroot setting
+✓ cetakGabungV2() - V8    - Sudah ada chroot setting (10 methods)
+
+TOTAL VERIFIKASI:
+- 13 instances of 'chroot' found in SertifikatController.php
+- 0 instances of 'isRemoteEnabled' => true (semua sudah false)
+
+═══════════════════════════════════════════════════════════════════════════════
+8. TECHNICAL NOTES
+═══════════════════════════════════════════════════════════════════════════════
+
+WHY THIS FIX WORKS:
+DomPDF adalah library server-side PHP yang generate PDF. Saat running di server,
+DomPDF TIDAK bisa melakukan HTTP request ke dirinya sendiri untuk mengambil 
+gambar via asset() atau url(). 
+
+DomPDF butuh:
+1. Direct filesystem access ke file gambar
+2. Setting 'chroot' sebagai base directory untuk security
+
+ALTERNATIF LAIN (tidak dipakai):
+- Base64 encode gambar di template: Membuat file template jadi besar
+- Copy gambar ke storage/: Duplikasi file yang tidak perlu
+
+SOLUSI TERPILIH:
+✓ public_path() di template + chroot setting di controller
+  = Optimal performance, no duplication, secure
+
+═══════════════════════════════════════════════════════════════════════════════
+9. RINGKASAN
+═══════════════════════════════════════════════════════════════════════════════
+
+FILE YANG DIUBAH:
+✓ app/Http/Controllers/SertifikatController.php (4 methods diperbaiki)
+
+FILE YANG DIPERIKSA (sudah benar):
+✓ resources/views/mentor/cetak.blade.php
+✓ resources/views/sertifikat/cetak_gabungan_premium.blade.php
+✓ resources/views/penilaian/cetak.blade.php
+
+PERUBAHAN KONFIGURASI:
+✓ isRemoteEnabled: true → false (4 methods)
+✓ Menambahkan 'chroot' => public_path() (4 methods)
+✓ Menambahkan 'isPhpEnabled' => true (consistency)
+
+STATUS: ✅ SELESAI - READY FOR TESTING
+
+═══════════════════════════════════════════════════════════════════════════════

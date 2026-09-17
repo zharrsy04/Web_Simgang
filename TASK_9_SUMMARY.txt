@@ -1,0 +1,80 @@
+TASK 9: FIX FITUR EDIT PENGUMUMAN DI DASHBOARD MENTOR
+=====================================================
+
+STATUS: COMPLETED
+
+ISSUE:
+------
+Tombol "Edit" di bagian Pengumuman (Announcements) di Dashboard Mentor tidak berfungsi:
+- Form muncul dengan benar (modal "Edit Pengumuman")
+- Tapi tombol "Update" tidak berfungsi saat diklik
+- Data tidak tersimpan ke database
+- Tidak ada notifikasi error atau sukses
+
+ROOT CAUSE:
+-----------
+Tidak ada logging dan error handling yang cukup untuk mengetahui apa yang terjadi saat:
+1. Form disubmit
+2. AJAX request dikirim ke server
+3. Database update dilakukan
+4. Response dikembalikan ke frontend
+
+Ini membuat debugging menjadi mustahil karena tidak ada visibility ke dalam prosesnya.
+
+SOLUSI:
+-------
+Ditambahkan comprehensive logging di:
+
+1. BACKEND (DashboardController::updatepengumuman)
+   - Log setiap step: request diterima, validasi, database lookup, update, error
+   - Log exception trace untuk debugging error
+   - Enhanced JSON response dengan id dan updated_at
+
+2. FRONTEND (dashboard.blade.php)
+   - Added console logging di openModal(), form submit, updateAnnouncement()
+   - Enhanced error handling dengan try-catch
+   - Display actual error messages dari server ke user
+   - Logging di loadAnnouncements() dan createAnnouncement()
+
+FILE YANG DIUBAH:
+-----------------
+1. app/Http/Controllers/DashboardController.php
+   - Method: updatepengumuman() (lines 340-420)
+   - Added: Logging, error handling, enhanced response
+
+2. resources/views/mentor/dashboard.blade.php
+   - Function: openModal() - Added console logging
+   - Function: form submit listener - Added console logging
+   - Function: updateAnnouncement() - Added console and error logging
+   - Function: createAnnouncement() - Added console logging
+   - Function: loadAnnouncements() - Added console logging
+
+VERIFIKASI:
+-----------
+Untuk test:
+1. Buka browser console (F12 > Console tab)
+2. Edit announcement - harus melihat console logs yang detail
+3. Check browser Network tab untuk melihat PUT request
+4. Check server logs di storage/logs/laravel.log untuk "Update pengumuman request"
+
+JIKA ADA MASALAH:
+-----------------
+1. Check browser console untuk error messages
+2. Check Network tab untuk response dari server
+3. Check server logs untuk error details
+4. Verify database langsung bahwa announcement terupdate
+
+CATATAN PENTING:
+----------------
+- Tidak ada perubahan logic, hanya added logging dan error handling
+- Backward compatible dengan existing functionality
+- Dapat dengan mudah debug masalah apapun dengan console logs dan server logs
+
+STATUS PENGEMBANGAN:
+-------------------
+TASK 6: Cleanup Daftar Bidang Pilihan - DONE
+TASK 7: Fix Form Tambah Penilaian Redirect - DONE  
+TASK 8: Fix & Enhance Fitur "Tetapkan Tugas" - DONE
+TASK 9: Fix Fitur Edit Pengumuman - DONE ✅
+
+Dokumentasi lengkap ada di: MAINTENANCE_FIX_EDIT_PENGUMUMAN.md

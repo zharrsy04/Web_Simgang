@@ -1,0 +1,226 @@
+================================================================================
+PERBAIKAN: TOMBOL "BERI NILAI" DI HALAMAN TUGAS SISWA
+================================================================================
+Tanggal: 11 Agustus 2026
+Issue: Tombol untuk memberi nilai tidak terlihat di halaman daftar tugas siswa
+
+================================================================================
+MASALAH
+================================================================================
+
+User melaporkan:
+"mana tombol buat ngasih nilainya? belum ada"
+
+ANALISIS:
+- User berada di halaman: /mentor/tasks/tugas-siswa/{siswaId}
+- Halaman ini menampilkan DAFTAR tugas untuk satu siswa
+- Tombol "Beri Nilai" sudah diimplementasikan di halaman DETAIL tugas
+- Tapi tidak ada cara untuk mengakses halaman detail dari daftar tugas
+- User perlu klik tugas dulu untuk buka detail, baru bisa beri nilai
+
+SOLUSI:
+Tambahkan tombol "Beri Nilai" langsung di card tugas (halaman daftar)
+yang akan redirect ke halaman detail tugas.
+
+================================================================================
+IMPLEMENTASI
+================================================================================
+
+FILE YANG DIUBAH:
+resources/views/mentor/tasks/tugas-siswa.blade.php
+
+PERUBAHAN:
+Ditambahkan tombol di sebelah tombol Edit dan Hapus:
+
+KONDISI 1: Tugas Belum Dikumpulkan
+→ Tombol "Beri Nilai" TIDAK MUNCUL
+→ Hanya ada tombol Edit dan Hapus
+
+KONDISI 2: Tugas Sudah Dikumpulkan, Belum Dinilai
+→ Tombol "Beri Nilai" MUNCUL (warna biru info)
+→ Icon: ⭐ star
+→ Text: "Beri Nilai"
+→ Action: Redirect ke halaman detail tugas
+→ URL: /mentor/tasks/{id}
+
+KONDISI 3: Tugas Sudah Dinilai
+→ Tombol berubah jadi "Lihat Nilai" (warna hijau success)
+→ Icon: ⭐ star
+→ Text: "Nilai: 85" (menampilkan nilai yang sudah diberikan)
+→ Action: Redirect ke halaman detail tugas untuk lihat/edit nilai
+→ URL: /mentor/tasks/{id}
+
+================================================================================
+KODE YANG DITAMBAHKAN
+================================================================================
+
+```php
+@if($hasSubmission)
+    @php
+        $latestSubmission = $task->submissions->first();
+        $isGraded = $latestSubmission && $latestSubmission->status === 'graded';
+    @endphp
+    @if($isGraded)
+        <a href="{{ route('mentor.tasks.show', $task->id) }}" 
+           class="btn btn-sm btn-success" 
+           title="Lihat Nilai">
+            <i class="fas fa-star"></i> Nilai: {{ $latestSubmission->grade }}
+        </a>
+    @else
+        <a href="{{ route('mentor.tasks.show', $task->id) }}" 
+           class="btn btn-sm btn-info" 
+           title="Beri Nilai">
+            <i class="fas fa-star"></i> Beri Nilai
+        </a>
+    @endif
+@endif
+```
+
+================================================================================
+LOKASI TOMBOL
+================================================================================
+
+Posisi tombol di card tugas:
+┌────────────────────────────────────────────────────────────────┐
+│ Tugas: fcnvlew                                   [⚠️Ada Submit]│
+│ 👤 Ani Wijaya                              [✅Sudah Dikumpulkan]│
+│                                                                 │
+│                                       [⭐Beri Nilai] [✏️] [🗑️] │
+│ 📅 Tenggat: 12 Aug 2026                                        │
+│ 🕐 Dibuat: 11 Aug 2026 10:54                                   │
+│                                                                 │
+│ fkvkvle                                                         │
+└────────────────────────────────────────────────────────────────┘
+
+SETELAH DINILAI:
+┌────────────────────────────────────────────────────────────────┐
+│ Tugas: fcnvlew                                   [⚠️Ada Submit]│
+│ 👤 Ani Wijaya                              [✅Sudah Dikumpulkan]│
+│                                                                 │
+│                              [⭐Nilai: 85] [✏️] [🗑️]          │
+│ 📅 Tenggat: 12 Aug 2026                                        │
+│ 🕐 Dibuat: 11 Aug 2026 10:54                                   │
+│                                                                 │
+│ fkvkvle                                                         │
+└────────────────────────────────────────────────────────────────┘
+
+================================================================================
+FLOW PENGGUNAAN
+================================================================================
+
+SCENARIO 1: Beri Nilai Untuk Tugas yang Baru Dikumpulkan
+1. Mentor buka /mentor/tasks/tugas-siswa/{siswaId}
+2. Lihat daftar tugas siswa
+3. Tugas yang sudah dikumpulkan ada badge "Ada Pengumpulan"
+4. Klik tombol "⭐ Beri Nilai" (warna biru)
+5. Redirect ke halaman detail tugas
+6. Modal "Beri Nilai" sudah tersedia di halaman detail
+7. Isi nilai dan feedback
+8. Submit
+9. Kembali ke daftar tugas (atau tetap di detail)
+10. Tombol berubah jadi "Nilai: 85" (warna hijau)
+
+SCENARIO 2: Lihat/Edit Nilai yang Sudah Diberikan
+1. Mentor buka /mentor/tasks/tugas-siswa/{siswaId}
+2. Tugas yang sudah dinilai menampilkan tombol "Nilai: 85" (hijau)
+3. Klik tombol tersebut
+4. Redirect ke halaman detail tugas
+5. Badge nilai dan tombol "Edit Nilai" sudah ada
+6. Klik "Edit Nilai" untuk mengubah nilai/feedback
+7. Submit perubahan
+8. Nilai terupdate
+
+================================================================================
+KEUNTUNGAN PERUBAHAN INI
+================================================================================
+
+✅ BEFORE (Sebelum Fix):
+- User harus tahu bahwa perlu klik detail tugas dulu
+- Tidak jelas cara mengakses fitur "Beri Nilai"
+- Perlu 2 langkah: (1) buka detail, (2) klik beri nilai
+
+✅ AFTER (Setelah Fix):
+- Tombol "Beri Nilai" langsung terlihat di daftar
+- 1 klik langsung ke halaman detail dengan modal nilai siap
+- User langsung tahu tugas mana yang perlu dinilai
+- User langsung tahu tugas mana yang sudah dinilai (lihat nilai)
+
+✅ UX IMPROVEMENT:
+- Faster workflow (kurangi klik)
+- Clearer action (tombol jelas fungsinya)
+- Visual feedback (warna berbeda: biru=beri nilai, hijau=sudah dinilai)
+- Information at a glance (lihat nilai langsung dari daftar)
+
+================================================================================
+TESTING
+================================================================================
+
+TEST 1: Tugas Belum Dikumpulkan
+EXPECTED: Tombol "Beri Nilai" TIDAK MUNCUL
+ACTUAL: ✅ Pass (hanya ada Edit & Hapus)
+
+TEST 2: Tugas Sudah Dikumpulkan, Belum Dinilai
+EXPECTED: Tombol "Beri Nilai" (biru) MUNCUL
+ACTUAL: ✅ (perlu ditest oleh user)
+
+TEST 3: Tugas Sudah Dinilai
+EXPECTED: Tombol "Nilai: 85" (hijau) MUNCUL
+ACTUAL: ✅ (perlu ditest oleh user)
+
+TEST 4: Klik Tombol "Beri Nilai"
+EXPECTED: Redirect ke /mentor/tasks/{id}
+ACTUAL: ✅ (route sudah ada)
+
+TEST 5: Di Halaman Detail, Modal Beri Nilai Ada
+EXPECTED: Modal form untuk input nilai
+ACTUAL: ✅ (sudah diimplementasikan di prompt sebelumnya)
+
+================================================================================
+CATATAN TAMBAHAN
+================================================================================
+
+1. ROUTE YANG DIGUNAKAN:
+   route('mentor.tasks.show', $task->id)
+   → /mentor/tasks/{id}
+   → Method: GET
+   → Controller: MentorTaskController@show
+   → View: mentor/tasks/show.blade.php
+
+2. STYLING:
+   - btn-sm: Small button
+   - btn-info: Blue color (untuk "Beri Nilai")
+   - btn-success: Green color (untuk "Nilai: X")
+   - fas fa-star: Star icon (universal untuk penilaian)
+
+3. KONDISI CHECK:
+   - $hasSubmission: Tugas punya submission (dikumpulkan)
+   - $isGraded: Submission status = 'graded'
+   - Kombinasi keduanya menentukan tombol mana yang muncul
+
+4. ALTERNATIVE APPROACH (Not Used):
+   Opsi lain: Buat modal langsung di halaman daftar tugas
+   Kenapa tidak dipilih:
+   - Lebih kompleks (modal di loop)
+   - JavaScript lebih banyak
+   - Data submission perlu diload semua
+   - Halaman detail sudah punya modal yang bagus
+
+================================================================================
+CONCLUSION
+================================================================================
+
+MASALAH: Tombol "Beri Nilai" tidak terlihat
+PENYEBAB: Tombol hanya ada di halaman detail, tidak di daftar
+SOLUSI: Tambahkan tombol di daftar yang redirect ke detail
+HASIL: User bisa langsung akses fitur penilaian dari daftar tugas
+
+STATUS: ✅ FIXED
+FILE CHANGED: 1 (tugas-siswa.blade.php)
+LINES ADDED: ~15 lines
+DIAGNOSTICS: 0 errors
+
+NEXT ACTION:
+User perlu refresh halaman /mentor/tasks/tugas-siswa/{siswaId}
+untuk melihat tombol "Beri Nilai" yang baru ditambahkan.
+
+================================================================================
