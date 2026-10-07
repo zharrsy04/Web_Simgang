@@ -287,8 +287,8 @@
                             <div class="col-md-6">
                                 <label for="nm_pembimbing" class="form-label">Nama Pembimbing Lapangan <span class="text-danger">*</span></label>
                                 <input type="text" name="nm_pembimbing" id="nm_pembimbing" class="form-control"
-                                    value="{{ old('nm_pembimbing', $defaults['nm_pembimbing'] ?? '') }}" placeholder="Nama asli pembimbing lapangan (BUKAN Pak Haykel)" required>
-                                <small class="text-muted">Diisi nama Pembimbing Lapangan asli (BUKAN Kepala Bidang).</small>
+                                    value="{{ old('nm_pembimbing', $defaults['nm_pembimbing'] ?? (auth()->user()->role === 'mentor' && !str_contains(strtolower(auth()->user()->nama ?? ''), 'administrator') ? auth()->user()->nama : '')) }}" placeholder="Nama pembimbing lapangan" required>
+                                <small class="text-muted">Nama Pembimbing Lapangan siswa.</small>
                                 @error('nm_pembimbing')
                                     <small class="text-danger d-block">{{ $message }}</small>
                                 @enderror
@@ -386,19 +386,20 @@
                             </div>
                             
                             <div class="col-md-6">
-                                <label for="nm_kadis" class="form-label">Nama Kepala Bidang <span class="text-danger">*</span></label>
+                                <label for="nm_kadis" class="form-label">Nama Kepala Dinas <span class="text-danger">*</span></label>
                                 <input type="text" name="nm_kadis" id="nm_kadis" class="form-control"
-                                    value="{{ old('nm_kadis') }}" placeholder="Contoh Informatika: M HAYKEL RAKHMATTULLOH TAUFIQ, S.Kom., M.M." required>
-                                <small class="text-muted">Nama Kepala Bidang (contoh Informatika: M HAYKEL RAKHMATTULLOH TAUFIQ, S.Kom., M.M.).</small>
+                                    value="{{ old('nm_kadis', \App\Constants\BidangConstants::KADIS_NAMA) }}" required>
+                                <small class="text-muted">Kepala Dinas Komunikasi dan Informatika permanen.</small>
                                 @error('nm_kadis')
                                     <small class="text-danger d-block">{{ $message }}</small>
                                 @enderror
                             </div>
 
                             <div class="col-md-6">
-                                <label for="nip_kadis" class="form-label">NIP Kepala Bidang <span class="text-danger">*</span></label>
+                                <label for="nip_kadis" class="form-label">NIP Kepala Dinas <span class="text-danger">*</span></label>
                                 <input type="text" name="nip_kadis" id="nip_kadis" class="form-control"
-                                    value="{{ old('nip_kadis') }}" placeholder="NIP Kepala Bidang" required>
+                                    value="{{ old('nip_kadis', \App\Constants\BidangConstants::KADIS_NIP) }}" required>
+                                <small class="text-muted">NIP Kepala Dinas permanen.</small>
                                 @error('nip_kadis')
                                     <small class="text-danger d-block">{{ $message }}</small>
                                 @enderror
@@ -826,47 +827,6 @@
                     }
                 });
             }, 500);
-        });
-
-        // Auto sync data Kepala Bidang saat memilih bidang
-        document.addEventListener('DOMContentLoaded', function() {
-            const bidangSelect = document.getElementById('bidang');
-            const nmKadisInput = document.getElementById('nm_kadis');
-            const nipKadisInput = document.getElementById('nip_kadis');
-            const nmPembimbingInput = document.getElementById('nm_pembimbing');
-
-            const kabidMapping = {
-                'Bidang Informatika': {
-                    nama: 'M HAYKEL RAKHMATTULLOH TAUFIQ, S.Kom., M.M.',
-                    nip: '198503232010011028'
-                },
-                'Bidang Statistik dan Persandian': {
-                    nama: 'Dra. ERNY INDRIYANI, M.M.',
-                    nip: '19680515 199303 2 007'
-                },
-                'Bidang Informasi dan Komunikasi Publik': {
-                    nama: 'ARIS RAKHMANTO, S.Kom.',
-                    nip: '19790618 200501 1 008'
-                }
-            };
-
-            if (bidangSelect) {
-                bidangSelect.addEventListener('change', function() {
-                    const selected = this.value;
-                    if (kabidMapping[selected]) {
-                        if (nmKadisInput) nmKadisInput.value = kabidMapping[selected].nama;
-                        if (nipKadisInput) nipKadisInput.value = kabidMapping[selected].nip;
-                    }
-                });
-            }
-
-            if (nmPembimbingInput) {
-                nmPembimbingInput.addEventListener('blur', function() {
-                    if (this.value.toLowerCase().includes('haykel')) {
-                        alert('PERHATIAN: Kolom ini untuk Pembimbing Lapangan asli siswa, BUKAN Kepala Bidang (Pak Haykel). Nama Kepala Bidang diisi pada Langkah 4.');
-                    }
-                });
-            }
         });
     </script>
 

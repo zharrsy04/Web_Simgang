@@ -350,15 +350,14 @@
         <div id="step4" class="form-step" style="display: none;">
             <div class="card mb-4">
                 <div class="card-header" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none;">
-                    <h5 class="mb-0">Data Pegawai Penandatangan</h5>
+                    <h5 class="mb-0">Data Kepala Dinas</h5>
                 </div>
                 <div class="card-body">
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <label for="sts_kadis" class="form-label">Status Kepala Dinas</label>
+                            <label for="sts_kadis" class="form-label">Status Kepala Dinas <span class="text-danger">*</span></label>
                             <select name="sts_kadis" id="sts_kadis" class="form-select" required>
-                                <option value="">Pilih Status</option>
-                                <option value="1" {{ old('sts_kadis') == '1' ? 'selected' : '' }}>
+                                <option value="1" {{ old('sts_kadis', '1') == '1' ? 'selected' : '' }}>
                                     Definitif
                                 </option>
                                 <option value="0" {{ old('sts_kadis') == '0' ? 'selected' : '' }}>
@@ -371,28 +370,27 @@
                         </div>
                         
                         <div class="col-md-6">
-                            <label for="nm_kadis" class="form-label">Nama Pegawai</label>
+                            <label for="nm_kadis" class="form-label">Nama Kepala Dinas <span class="text-danger">*</span></label>
                             <input type="text" name="nm_kadis" id="nm_kadis" class="form-control"
-                                value="{{ old('nm_kadis') }}" required>
+                                value="{{ old('nm_kadis', \App\Constants\BidangConstants::KADIS_NAMA) }}" required>
                             @error('nm_kadis')
                                 <small class="text-danger">{{ $message }}</small>
                             @enderror
                         </div>
 
                         <div class="col-md-6">
-                            <label for="nip_kadis" class="form-label">NIP Pegawai</label>
+                            <label for="nip_kadis" class="form-label">NIP Kepala Dinas <span class="text-danger">*</span></label>
                             <input type="text" name="nip_kadis" id="nip_kadis" class="form-control"
-                                value="{{ old('nip_kadis') }}" required>
+                                value="{{ old('nip_kadis', \App\Constants\BidangConstants::KADIS_NIP) }}" required>
                             @error('nip_kadis')
                                 <small class="text-danger">{{ $message }}</small>
                             @enderror
                         </div>
                     
                         <div class="col-md-6">
-                            <label for="jabatan_pegawai" class="form-label">Jabatan Pegawai</label>
+                            <label for="jabatan_pegawai" class="form-label">Jabatan Pegawai <span class="text-danger">*</span></label>
                             <select name="jabatan_pegawai" id="jabatan_pegawai" class="form-select" required>
-                                <option value="">Pilih Jabatan</option>
-                                <option value="Kepala Dinas Komunikasi dan Informatika" {{ old('jabatan_pegawai') == 'Kepala Dinas Komunikasi dan Informatika' ? 'selected' : '' }}>
+                                <option value="Kepala Dinas Komunikasi dan Informatika" {{ old('jabatan_pegawai', 'Kepala Dinas Komunikasi dan Informatika') == 'Kepala Dinas Komunikasi dan Informatika' ? 'selected' : '' }}>
                                     Kepala Dinas Komunikasi dan Informatika
                                 </option>
                                 <option value="Kepala Bidang Informatika" {{ old('jabatan_pegawai') == 'Kepala Bidang Informatika' ? 'selected' : '' }}>

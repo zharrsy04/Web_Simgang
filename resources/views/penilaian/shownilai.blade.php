@@ -906,11 +906,15 @@
                 </div>
                 <div class="info-item">
                     <div class="info-label">Pembimbing Lapangan</div>
-                    <div class="info-value">{{ $sertifikat->mentorSiswa->mentor->nama ?? $sertifikat->nm_pembimbing ?? '-' }}</div>
+                    <div class="info-value">{{ $sertifikat->nama_pembimbing ?? '-' }}</div>
                 </div>
                 <div class="info-item">
                     <div class="info-label">Kepala Bidang (Kabid)</div>
-                    <div class="info-value">{{ $sertifikat->nm_kadis ?? '-' }}</div>
+                    <div class="info-value">{{ $sertifikat->nama_kabid ?? '-' }}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Kepala Dinas</div>
+                    <div class="info-value">{{ $sertifikat->nama_kadis ?? '-' }}</div>
                 </div>
             </div>
         </div>

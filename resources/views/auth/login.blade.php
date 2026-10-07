@@ -390,6 +390,8 @@
                 <img src="{{ asset('images/Logo-PNC.png') }}" alt="Logo Politeknik Negeri Cilacap" class="uni-logo">
                 <img src="{{ asset('images/logo unnes.png') }}" alt="Logo Universitas Negeri Semarang" class="uni-logo">
                 <img src="{{ asset('images/Logo_Telkom_University_potrait.png') }}" alt="Logo Telkom University" class="uni-logo">
+                <img src="{{ asset('images/bsi.png') }}" alt="Logo BSI" class="uni-logo">
+                <img src="{{ asset('images/amikom.png') }}" alt="Logo AMIKOM" class="uni-logo">
             </div>
         </div>
     </div>
@@ -476,3 +478,4 @@
     </script>
 </body>
 </html>
+

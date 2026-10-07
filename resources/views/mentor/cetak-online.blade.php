@@ -214,8 +214,8 @@
                         Cilacap, {{ $ex4[2] . ' ' . $bulan[(int) $ex4[1]] . ' ' . $ex4[0] }}<br>
                         Kepala Dinas Komunikasi dan Informatika<br>
                         Kabupaten Cilacap<br><br><br><br>
-                        <span class="signature-name">BUDDY HARYANTO, S.Sos., M.M.</span><br>
-                        <span class="signature-details">NIP. 19711203 199803 1 002</span>
+                        <span class="signature-name">{{ $sertifikat->nama_kadis }}</span><br>
+                        <span class="signature-details">NIP. {{ $sertifikat->nip_kadis }}</span>
                     </td>
                 </tr>
             </table>

@@ -924,7 +924,9 @@ public function dashboard()
                 'nama' => $sertifikat->nama_kabid,
                 'nip' => $sertifikat->nip_kabid
             ];
-            $htmlContent = view('sertifikat.cetak_gabungan_premium', compact('sertifikat', 'penilaians', 'kabid'))->render();
+            $qrUrl = route('sertifikat.cetak-gabungan-v5', ['id_sertifikat' => $sertifikat->id_sertifikat]);
+            $qrCodeImage = \App\Helpers\QrCodeHelper::generatePngBase64($qrUrl, 200);
+            $htmlContent = view('sertifikat.cetak_gabungan_premium', compact('sertifikat', 'penilaians', 'kabid', 'qrUrl', 'qrCodeImage'))->render();
 
             $pdf = Pdf::loadHTML($htmlContent);
             
@@ -1178,27 +1180,9 @@ public function dashboard()
 
             // Set Kepala Bidang dynamically based on student's 'bidang'
             $kabid = (object)[
-                'nama' => '',
-                'nip' => ''
+                'nama' => $sertifikat->nama_kabid,
+                'nip' => $sertifikat->nip_kabid
             ];
-            
-            if ($sertifikat->bidang == 'Bidang Informatika') {
-                $kabid->nama = 'M HAYKEL RAKHMATTULLOH TAUFIQ, S.Kom., M.M.';
-                $kabid->nip = '198503232010011028';
-            } elseif ($sertifikat->bidang == 'Bidang Statistik dan Persandian') {
-                // Example data if needed
-                $kabid->nama = 'KEPALA BIDANG STATISTIK, ...';
-                $kabid->nip = '...';
-            } elseif ($sertifikat->bidang == 'Bidang Informasi dan Komunikasi Publik') {
-                $kabid->nama = 'KEPALA BIDANG IKP, ...';
-                $kabid->nip = '...';
-            }
-            
-            // Fallback to nm_kadis if not specifically defined above
-            if (empty($kabid->nama) && !empty($sertifikat->nm_kadis)) {
-                $kabid->nama = $sertifikat->nm_kadis;
-                $kabid->nip = $sertifikat->nip_kadis;
-            }
 
             // Clear view cache before rendering
             \Artisan::call('view:clear');
@@ -1295,25 +1279,9 @@ public function dashboard()
 
             // Set Kepala Bidang dynamically based on student's 'bidang'
             $kabid = (object)[
-                'nama' => '',
-                'nip' => ''
+                'nama' => $sertifikat->nama_kabid,
+                'nip' => $sertifikat->nip_kabid
             ];
-            
-            if ($sertifikat->bidang == 'Bidang Informatika') {
-                $kabid->nama = 'M HAYKEL RAKHMATTULLOH TAUFIQ, S.Kom., M.M.';
-                $kabid->nip = '198503232010011028';
-            } elseif ($sertifikat->bidang == 'Bidang Statistik dan Persandian') {
-                $kabid->nama = 'KEPALA BIDANG STATISTIK, ...';
-                $kabid->nip = '...';
-            } elseif ($sertifikat->bidang == 'Bidang Informasi dan Komunikasi Publik') {
-                $kabid->nama = 'KEPALA BIDANG IKP, ...';
-                $kabid->nip = '...';
-            }
-            
-            if (empty($kabid->nama) && !empty($sertifikat->nm_kadis)) {
-                $kabid->nama = $sertifikat->nm_kadis;
-                $kabid->nip = $sertifikat->nip_kadis;
-            }
 
             // Render view 'cetak_gabungan' menjadi HTML
             $htmlContent = view('sertifikat.cetak_gabungan', compact('sertifikat', 'penilaians', 'kabid'))->render();
@@ -1360,25 +1328,9 @@ public function dashboard()
 
             // Set Kepala Bidang dynamically based on student's 'bidang'
             $kabid = (object)[
-                'nama' => '',
-                'nip' => ''
+                'nama' => $sertifikat->nama_kabid,
+                'nip' => $sertifikat->nip_kabid
             ];
-            
-            if ($sertifikat->bidang == 'Bidang Informatika') {
-                $kabid->nama = 'M HAYKEL RAKHMATTULLOH TAUFIQ, S.Kom., M.M.';
-                $kabid->nip = '198503232010011028';
-            } elseif ($sertifikat->bidang == 'Bidang Statistik dan Persandian') {
-                $kabid->nama = 'KEPALA BIDANG STATISTIK, ...';
-                $kabid->nip = '...';
-            } elseif ($sertifikat->bidang == 'Bidang Informasi dan Komunikasi Publik') {
-                $kabid->nama = 'KEPALA BIDANG IKP, ...';
-                $kabid->nip = '...';
-            }
-            
-            if (empty($kabid->nama) && !empty($sertifikat->nm_kadis)) {
-                $kabid->nama = $sertifikat->nm_kadis;
-                $kabid->nip = $sertifikat->nip_kadis;
-            }
 
             // Render view 'cetak_gabungan' menjadi HTML
             $htmlContent = view('sertifikat.cetak_gabungan', compact('sertifikat', 'penilaians', 'kabid'))->render();

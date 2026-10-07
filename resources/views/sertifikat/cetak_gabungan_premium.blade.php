@@ -568,14 +568,12 @@
                                 terhitung mulai tanggal {{ $ex2[2] . ' ' . $bulan[(int) $ex2[1]] . ' ' . $ex2[0] }} sampai dengan
                                 {{ $ex3[2] . ' ' . $bulan[(int) $ex3[1]] . ' ' . $ex3[0] }}, dengan hasil <strong>{{ $predikat }}</strong>.
                             </p>
-                            <?php 
-                            use Illuminate\Support\Facades\DB;
-
-                            $unitKerja = DB::table('unit_kerja')
-                            ->where('name_unit_kerja', $sertifikat->bidang)
-                            ->first(); 
-
-                            ?> 
+                            @php
+                                $kabidNama = $sertifikat->nama_kabid;
+                                $kabidNip = $sertifikat->nip_kabid;
+                                $kadisNama = $sertifikat->nama_kadis;
+                                $kadisNip = $sertifikat->nip_kadis;
+                            @endphp
 
                             <table class="sig-table">
                                 <tr>
@@ -583,22 +581,25 @@
                                         <div class="sig-title">
                                             Kepala Bidang
                                         </div>
-                                        <div class="sig-name">{{ $unitKerja->nama_kepala }}</div>
+                                        <div class="sig-name">{{ $kabidNama }}</div>
                                         <div class="sig-detail">
-                                            NIP. {{ $unitKerja->nip }}
+                                            NIP. {{ $kabidNip }}
                                         </div>
                                     </td>
                                     <td style="width: 34%;">
-                                        <!-- QR Code removed -->
+                                        <div class="qr-box">
+                                            <img src="{{ $qrCodeImage ?? \App\Helpers\QrCodeHelper::generatePngBase64($qrUrl ?? route('sertifikat.cetak-gabungan-v5', ['id_sertifikat' => $sertifikat->id_sertifikat]), 200) }}" alt="QR Code" style="width: 70px; height: 70px; display: block;" />
+                                        </div>
+                                        <div class="qr-label">Scan Validasi</div>
                                     </td>
                                     <td style="width: 33%;">
                                         <div class="sig-title">
                                             Cilacap, {{ $ex4[2] . ' ' . $bulan[(int) $ex4[1]] . ' ' . $ex4[0] }}<br>
                                             Kepala Dinas Komunikasi dan<br>Informatika<br>Kabupaten Cilacap
                                         </div>
-                                        <div class="sig-name">{{ $sertifikat->nm_kadis }}</div>
+                                        <div class="sig-name">{{ $kadisNama }}</div>
                                         <div class="sig-detail">
-                                            NIP. {{ $sertifikat->nip_kadis }}
+                                            NIP. {{ $kadisNip }}
                                         </div>
                                     </td>
                                 </tr>
@@ -699,22 +700,26 @@
                                         </div>
                                     </td>
                                     <td class="sig-nilai">
+                                        @php
+                                            $mentorNama = $sertifikat->nama_pembimbing;
+                                            $mentorNip = $sertifikat->nip_pembimbing;
+                                        @endphp
                                         <table class="sig-nilai-table">
                                             <tr>
                                                 <td style="width: 50%;">
                                                     <div class="sig-title" style="margin-bottom: {{ $sigMarginBottom }};">
                                                         Mentor Lapangan
                                                     </div>
-                                                    <div class="sig-name">{{ $sertifikat->nm_pembimbing }}</div>
-                                                    <div class="sig-detail">NIP. {{ $sertifikat->nik_pembimbing }}</div>
+                                                    <div class="sig-name">{{ $mentorNama }}</div>
+                                                    <div class="sig-detail">NIP. {{ $mentorNip }}</div>
                                                 </td>
                                                 <td style="width: 50%;">
                                                     <div class="sig-title" style="margin-bottom: {{ $sigMarginBottom }};">
                                                         Cilacap, {{ $ex4[2] . ' ' . $bulan[(int) $ex4[1]] . ' ' . $ex4[0] }}<br>
-                                                        Pembimbing
+                                                        Kepala Bidang
                                                     </div>
-                                                    <div class="sig-name">{{ $unitKerja->nama_kepala }}</div>
-                                                    <div class="sig-detail">NIP. {{ $unitKerja->nip }}</div>
+                                                    <div class="sig-name">{{ $kabidNama }}</div>
+                                                    <div class="sig-detail">NIP. {{ $kabidNip }}</div>
                                                 </td>
                                             </tr>
                                         </table>

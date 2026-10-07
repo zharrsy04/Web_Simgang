@@ -551,9 +551,9 @@
                                 Cilacap, {{ $ex4[2] . ' ' . $bulan[(int) $ex4[1]] . ' ' . $ex4[0] }}<br>
                                 Kepala Dinas Komunikasi dan<br>Informatika<br>Kabupaten Cilacap
                             </div>
-                            <div class="sig-name">BUDDY HARYANTO, S.Sos., M.M.</div>
+                            <div class="sig-name">{{ $sertifikat->nama_kadis }}</div>
                             <div class="sig-detail">
-                                NIP. 19711203 199803 1 002
+                                NIP. {{ $sertifikat->nip_kadis }}
                             </div>
                         </td>
                     </tr>

@@ -418,7 +418,7 @@ Halaman login memiliki 2 field input:
 ### Fitur Tambahan
 
 - **Statistik Chart:** Panel di sebelah kiri form menampilkan grafik "Jumlah Siswa Magang per Sekolah" sebagai visualisasi data (untuk menarik minat calon peserta).
-- **Logo Universitas Partner:** Di bagian bawah form, terdapat logo universitas/institusi partner (PNC, UNNES, Telkom University) dengan label "Created by:".
+- **Logo Universitas Partner:** Di bagian bawah form, terdapat logo universitas/institusi partner (Unsoed, UNS, PNC, UNNES, Telkom University, BSI, AMIKOM) dengan label "Created by:".
 - **Link ke Register:** Terdapat link "Belum punya akun? Daftar di sini" untuk pengunjung yang belum memiliki akun.
 
 ### Langkah Penggunaan

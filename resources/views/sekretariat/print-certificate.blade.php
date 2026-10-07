@@ -60,7 +60,7 @@
 
                     <p style="margin: 30px 0 20px 0; color: #666; font-size: 13px; line-height: 1.6;">
                         Dengan ini menyatakan bahwa yang tersebut di atas telah melaksanakan kegiatan Praktik Kerja Lapangan (PKL) 
-                        di {{ $sertifikat->bidang }}, Dinas Komunikasi dan Informatika Provinsi Riau dengan baik dan memuaskan.
+                        di {{ $sertifikat->bidang }}, Dinas Komunikasi dan Informatika Kabupaten Cilacap dengan baik dan memuaskan.
                     </p>
                 </div>
 
@@ -73,8 +73,8 @@
                     </div>
                     <div style="text-align: center; width: 45%;">
                         <p style="margin: 0 0 60px 0; color: #333; font-weight: 600;">Kepala Dinas Komunikasi dan Informatika,</p>
-                        <p style="margin: 0; color: #333; font-weight: 600; min-height: 20px;">BUDDY HARYANTO, S.Sos., M.M.</p>
-                        <p style="margin: 5px 0 0 0; color: #666; font-size: 12px;">NIP. 19711203 199803 1 002</p>
+                        <p style="margin: 0; color: #333; font-weight: 600; min-height: 20px;">{{ $sertifikat->nama_kadis }}</p>
+                        <p style="margin: 5px 0 0 0; color: #666; font-size: 12px;">NIP. {{ $sertifikat->nip_kadis }}</p>
                     </div>
                 </div>
 

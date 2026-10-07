@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
+use App\Constants\BidangConstants;
 
 class SertifikatPKL extends Model
 {
@@ -341,89 +343,85 @@ class SertifikatPKL extends Model
     }
 
     /**
-     * Accessor untuk nama Kepala Bidang.
-     * Mengutamakan data yang diinput pada Form Langkah 4 (nm_kadis) dari database/form.
-     * Jika kosong atau masih berupa nama Kepala Dinas lama (Buddy/Supriyanto),
-     * maka menggunakan data default Kepala Bidang berdasarkan bidang siswa.
+     * Accessor untuk nama Kepala Dinas permanen (BUDDY HARYANTO, S.Sos., M.M.).
+     */
+    public function getNmKadisAttribute()
+    {
+        $raw = $this->attributes['nm_kadis'] ?? '';
+        if (str_contains(strtolower($raw), 'supriyanto')) {
+            return $raw;
+        }
+        return BidangConstants::KADIS_NAMA;
+    }
+
+    public function getNamaKadisAttribute()
+    {
+        return $this->nm_kadis;
+    }
+
+    /**
+     * Accessor untuk NIP Kepala Dinas permanen.
+     */
+    public function getNipKadisAttribute()
+    {
+        $raw = $this->attributes['nm_kadis'] ?? '';
+        if (str_contains(strtolower($raw), 'supriyanto')) {
+            return $this->attributes['nip_kadis'] ?? '19650825 199403 1 009';
+        }
+        return BidangConstants::KADIS_NIP;
+    }
+
+    /**
+     * Accessor untuk nama Kepala Bidang sesuai bidang magang siswa.
      */
     public function getNamaKabidAttribute()
     {
-        // 1. Cek parameter override dari request (misal saat preview atau filter)
+        // 1. Cek parameter override dari request jika ada
         if (request()->filled('nama_kabid')) {
             return request('nama_kabid');
         }
-        if (request()->filled('nm_kadis')) {
-            $reqKadis = strtolower(trim(request('nm_kadis')));
-            if (!str_contains($reqKadis, 'buddy') && !str_contains($reqKadis, 'supriyanto')) {
-                return request('nm_kadis');
+
+        // 2. Cek di tabel unit_kerja berdasarkan bidang siswa
+        $bidang = trim($this->bidang ?? '');
+        if (!empty($bidang)) {
+            $unitKerja = DB::table('unit_kerja')
+                ->where('name_unit_kerja', $bidang)
+                ->first();
+            if ($unitKerja && !empty($unitKerja->nama_kepala)) {
+                return $unitKerja->nama_kepala;
             }
         }
 
-        // 2. Prioritaskan data yang tersimpan di database dari inputan Form Langkah 4 (kolom nm_kadis)
-        $nmKadis = $this->nm_kadis ?? $this->attributes['nm_kadis'] ?? null;
-        if (!empty($nmKadis)) {
-            $cleanKadis = strtolower(trim($nmKadis));
-            // Jika BUKAN nama Kepala Dinas lama (Buddy Haryanto / Supriyanto)
-            if (!str_contains($cleanKadis, 'buddy') && !str_contains($cleanKadis, 'supriyanto')) {
-                return $nmKadis;
-            }
-        }
-
-        // 3. Fallback: Default Kepala Bidang sesuai bidang penempatan siswa
-        $bidang = trim(strtolower($this->bidang ?? ''));
-        if (str_contains($bidang, 'informatika')) {
-            return 'M HAYKEL RAKHMATTULLOH TAUFIQ, S.Kom., M.M.';
-        } elseif (str_contains($bidang, 'statistik') || str_contains($bidang, 'persandian')) {
-            return 'Dra. ERNY INDRIYANI, M.M.';
-        } elseif (str_contains($bidang, 'informasi') || str_contains($bidang, 'komunikasi') || str_contains($bidang, 'ikp')) {
-            return 'ARIS RAKHMANTO, S.Kom.';
-        }
-
-        return !empty($nmKadis) ? $nmKadis : 'Kepala Bidang';
+        // 3. Fallback pemetaan resmi dari BidangConstants
+        $kabidData = BidangConstants::getKabidByBidang($bidang);
+        return $kabidData['nama'];
     }
 
     /**
-     * Accessor untuk NIP Kepala Bidang.
-     * Mengutamakan data NIP yang diinput pada Form Langkah 4 (nip_kadis) dari database/form.
-     * Jika kosong atau masih berupa NIP Kadis lama, gunakan default NIP sesuai bidang.
+     * Accessor untuk NIP Kepala Bidang sesuai bidang magang siswa.
      */
     public function getNipKabidAttribute()
     {
-        // 1. Cek parameter override dari request
         if (request()->filled('nip_kabid')) {
             return request('nip_kabid');
         }
-        if (request()->filled('nip_kadis')) {
-            $reqNip = trim(request('nip_kadis'));
-            if (!str_contains($reqNip, '19711203') && !str_contains($reqNip, '19650825') && $reqNip !== '-') {
-                return $reqNip;
+
+        $bidang = trim($this->bidang ?? '');
+        if (!empty($bidang)) {
+            $unitKerja = DB::table('unit_kerja')
+                ->where('name_unit_kerja', $bidang)
+                ->first();
+            if ($unitKerja && !empty($unitKerja->nip)) {
+                return $unitKerja->nip;
             }
         }
 
-        // 2. Prioritaskan data yang tersimpan di database dari inputan Form Langkah 4 (kolom nip_kadis)
-        $nipKadis = $this->nip_kadis ?? $this->attributes['nip_kadis'] ?? null;
-        if (!empty($nipKadis)) {
-            $cleanNip = trim($nipKadis);
-            if (!str_contains($cleanNip, '19711203') && !str_contains($cleanNip, '19650825') && $cleanNip !== '-') {
-                return $nipKadis;
-            }
-        }
-
-        // 3. Fallback: Default NIP Kepala Bidang sesuai bidang siswa
-        $bidang = trim(strtolower($this->bidang ?? ''));
-        if (str_contains($bidang, 'informatika')) {
-            return '198503232010011028';
-        } elseif (str_contains($bidang, 'statistik') || str_contains($bidang, 'persandian')) {
-            return '19680515 199303 2 007';
-        } elseif (str_contains($bidang, 'informasi') || str_contains($bidang, 'komunikasi') || str_contains($bidang, 'ikp')) {
-            return '19790618 200501 1 008';
-        }
-
-        return !empty($nipKadis) ? $nipKadis : '-';
+        $kabidData = BidangConstants::getKabidByBidang($bidang);
+        return $kabidData['nip'];
     }
 
     /**
-     * Helper untuk memeriksa apakah nama pembimbing adalah nama asli (bukan role/dummy akun/Kepala Bidang).
+     * Helper untuk memeriksa apakah nama pembimbing adalah nama asli (bukan role/dummy akun/Kepala Bidang/Kepala Dinas).
      */
     public static function isRealMentorName(?string $name, ?string $kabidName = null): bool
     {
@@ -456,21 +454,25 @@ class SertifikatPKL extends Model
             }
         }
 
-        // Tidak boleh sama dengan nama Kepala Bidang
+        // Tidak boleh sama dengan nama Kepala Bidang atau Kepala Dinas
         if ($kabidName) {
             $cleanKabid = trim(strtolower(preg_replace('/[^a-zA-Z]/', '', $kabidName)));
             $cleanName = trim(strtolower(preg_replace('/[^a-zA-Z]/', '', $name)));
-            if ($cleanName === $cleanKabid || str_contains($cleanName, 'haykel')) {
+            if ($cleanName === $cleanKabid) {
                 return false;
             }
+        }
+
+        if (str_contains($clean, 'haykel') || str_contains($clean, 'priatmoko') || str_contains($clean, 'irpan') || str_contains($clean, 'buddy')) {
+            return false;
         }
 
         return true;
     }
 
     /**
-     * Accessor untuk Pembimbing Lapangan / Mentor agar tidak terjadi duplikasi dengan Kepala Bidang
-     * dan mengambil dari inputan Langkah 3 Form Edit Siswa (nm_pembimbing) atau pembimbing asli.
+     * Accessor untuk Pembimbing Lapangan / Mentor.
+     * Mengambil langsung dari inputan / database nm_pembimbing siswa secara otomatis.
      */
     public function getPembimbingLapanganAttribute()
     {
@@ -482,77 +484,39 @@ class SertifikatPKL extends Model
             return request('nama_pembimbing');
         }
 
-        $kabidNama = $this->nama_kabid;
-
-        // 2. Prioritas utama: Ambil data dari inputan Langkah 3 Form Edit Siswa (nm_pembimbing)
-        // jika nama pembimbing asli (BUKAN Pak Haykel dan bukan role dummy)
-        if (!empty($this->nm_pembimbing) && self::isRealMentorName($this->nm_pembimbing, $kabidNama)) {
+        // 2. Prioritas utama: Ambil data dari kolom nm_pembimbing di database
+        if (!empty($this->nm_pembimbing) && trim($this->nm_pembimbing) !== '-' && trim($this->nm_pembimbing) !== '') {
             return $this->nm_pembimbing;
         }
 
-        // 3. Cek atribut/kolom kustom pembimbing_lapangan di database jika sudah diset
-        if (!empty($this->attributes['pembimbing_lapangan']) && self::isRealMentorName($this->attributes['pembimbing_lapangan'], $kabidNama)) {
+        // 3. Cek atribut/kolom kustom pembimbing_lapangan di database jika ada
+        if (!empty($this->attributes['pembimbing_lapangan']) && trim($this->attributes['pembimbing_lapangan']) !== '-') {
             return $this->attributes['pembimbing_lapangan'];
         }
 
         // 4. Cek dari relasi mentor_siswa (nama lengkap asli pembimbing dari tbl_login)
-        if ($this->mentorSiswa && $this->mentorSiswa->mentor) {
-            $mentorNama = $this->mentorSiswa->mentor->nama;
-            if (self::isRealMentorName($mentorNama, $kabidNama)) {
-                return $mentorNama;
-            }
+        if ($this->mentorSiswa && $this->mentorSiswa->mentor && !empty($this->mentorSiswa->mentor->nama)) {
+            return $this->mentorSiswa->mentor->nama;
         }
 
         // 5. Cek relasi penempatan_bidang siswa
         if ($this->penempatan && $this->penempatan->user_id) {
             $penempatanUser = User::find($this->penempatan->user_id);
-            if ($penempatanUser && self::isRealMentorName($penempatanUser->nama, $kabidNama)) {
+            if ($penempatanUser && !empty($penempatanUser->nama)) {
                 return $penempatanUser->nama;
             }
         }
 
-        // 6. Cek user pembuat jika merupakan mentor dengan nama asli
-        if ($this->mentor && ($this->mentor->role ?? '') === 'mentor' && self::isRealMentorName($this->mentor->nama, $kabidNama)) {
+        // 6. Cek user pembuat jika merupakan mentor
+        if ($this->mentor && ($this->mentor->role ?? '') === 'mentor' && !empty($this->mentor->nama)) {
             return $this->mentor->nama;
         }
 
         // 7. Cek handover mentor
-        if ($this->handoverMentor && ($this->handoverMentor->role ?? '') === 'mentor' && self::isRealMentorName($this->handoverMentor->nama, $kabidNama)) {
+        if ($this->handoverMentor && ($this->handoverMentor->role ?? '') === 'mentor' && !empty($this->handoverMentor->nama)) {
             return $this->handoverMentor->nama;
         }
 
-        // 8. Ambil nama lengkap asli mentor dari tbl_login berdasarkan bidang siswa
-        if (!empty($this->bidang)) {
-            $realMentor = User::where('role', 'mentor')
-                ->where('bidang', $this->bidang)
-                ->where('nama', 'NOT LIKE', '%Administrator%')
-                ->where('nama', 'NOT LIKE', '%Admin%')
-                ->where('nama', 'NOT LIKE', '%mame%')
-                ->where('nama', 'NOT LIKE', '%test%')
-                ->where('username', 'NOT LIKE', '%test%')
-                ->where('nama', '!=', $kabidNama)
-                ->orderBy('id', 'asc')
-                ->first();
-
-            if ($realMentor && self::isRealMentorName($realMentor->nama, $kabidNama)) {
-                return $realMentor->nama;
-            }
-        }
-
-        // 9. Jika masih belum ada, cari sembarang mentor asli di tbl_login
-        $anyRealMentor = User::where('role', 'mentor')
-            ->where('nama', 'NOT LIKE', '%Administrator%')
-            ->where('nama', 'NOT LIKE', '%Admin%')
-            ->where('nama', 'NOT LIKE', '%mame%')
-            ->where('nama', 'NOT LIKE', '%test%')
-            ->where('nama', '!=', $kabidNama)
-            ->first();
-
-        if ($anyRealMentor && self::isRealMentorName($anyRealMentor->nama, $kabidNama)) {
-            return $anyRealMentor->nama;
-        }
-
-        // 10. Fallback aman
         return 'Pembimbing Lapangan';
     }
 
@@ -581,10 +545,7 @@ class SertifikatPKL extends Model
             return request('nip_pembimbing');
         }
 
-        $nipKabid = $this->nip_kabid;
-
-        // Ambil dari nik_pembimbing jika bukan NIP Kepala Bidang
-        if (!empty($this->nik_pembimbing) && trim($this->nik_pembimbing) !== trim($nipKabid) && $this->nik_pembimbing !== '198503232010011028' && $this->nik_pembimbing !== '-') {
+        if (!empty($this->nik_pembimbing) && trim($this->nik_pembimbing) !== '') {
             return $this->nik_pembimbing;
         }
 

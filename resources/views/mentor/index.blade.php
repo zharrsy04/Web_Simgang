@@ -614,18 +614,18 @@
                                         <!-- Data pegawai -->
                                         <div class="card mb-3">
                                             <div class="card-header">
-                                                <h5>Data Pegawai</h5>
+                                                <h5>Data Kepala Dinas</h5>
                                             </div>
                                             <div class="card-body">
                                                 <div class="row">
                                                     <div class="col-12 col-md-6 mb-3">
-                                                        <p class="mb-1"><strong>Nama Pegawai:</strong> <span class="text-muted">{{ $sertifikat->nm_kadis }}</span></p>
+                                                        <p class="mb-1"><strong>Nama Kepala Dinas:</strong> <span class="text-muted">{{ $sertifikat->nm_kadis }}</span></p>
                                                     </div>
                                                     <div class="col-12 col-md-6 mb-3">
-                                                        <p class="mb-1"><strong>NIP Pegawai:</strong> <span class="text-muted">{{ $sertifikat->nip_kadis }}</span></p>
+                                                        <p class="mb-1"><strong>NIP Kepala Dinas:</strong> <span class="text-muted">{{ $sertifikat->nip_kadis }}</span></p>
                                                     </div>
                                                     <div class="col-12 col-md-6 mb-3">
-                                                        <p class="mb-1"><strong>Jabatan Pegawai:</strong> <span class="text-muted">{{ $sertifikat->jabatan_pegawai }}</span></p>
+                                                        <p class="mb-1"><strong>Jabatan:</strong> <span class="text-muted">{{ $sertifikat->jabatan_pegawai }}</span></p>
                                                     </div>
                                                 </div>
                                             </div>

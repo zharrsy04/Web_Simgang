@@ -66,7 +66,7 @@ Route::get('/api/internship-data', [LandingCalendarController::class, 'getIntern
 // Route::redirect('/', '/login');
 
 // Middleware auth - Semua route yang memerlukan autentikasi
-Route::middleware(['auth', 'web'])->group(function () {
+Route::middleware(['auth'])->group(function () {
     // Dashboard (untuk role selain siswa, misal admin/mentor)
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::post('/dashboard/simpanpengumuman', [DashboardController::class, 'simpanpengumuman'])->name('notifikasi');
@@ -95,6 +95,10 @@ Route::middleware(['auth', 'web'])->group(function () {
 
     // Quota Management (Must be defined before /{sertifikat} wildcard to avoid route conflict)
     Route::get('/kuota', [\App\Http\Controllers\LandingCalendarController::class, 'manageQuota'])->name('manage-quota');
+
+    // Absensi Siswa Bimbingan (dinonaktifkan sementara)
+    // Route::get('/absensi-siswa', [\App\Http\Controllers\AttendanceController::class, 'mentorIndex'])->name('absensi.index');
+    // Route::get('/absensi-siswa/{idSertifikat}/riwayat', [\App\Http\Controllers\AttendanceController::class, 'mentorRiwayat'])->name('absensi.riwayat');
 
     // CRUD Data Mentor (Mentor & Sekretariat only) - Must be before wildcard routes
     Route::prefix('data-mentor')->name('data-mentor.')->middleware(['roleProtection:mentor,sekretariat'])->group(function () {
@@ -240,6 +244,11 @@ Route::middleware(['auth', 'web'])->group(function () {
 
     // Route untuk portofolio siswa
     Route::get('/portofolio', [\App\Http\Controllers\PortofolioController::class, 'index'])->name('portofolio.index');
+
+    // Route Absensi Harian Siswa (dinonaktifkan sementara)
+    // Route::get('/absensi', [\App\Http\Controllers\AttendanceController::class, 'siswaIndex'])->name('absensi.index');
+    // Route::post('/absensi', [\App\Http\Controllers\AttendanceController::class, 'siswaStore'])->name('absensi.store');
+    // Route::post('/absensi/pulang', [\App\Http\Controllers\AttendanceController::class, 'siswaPulang'])->name('absensi.pulang');
 
     // 📌 Tasks siswa
     Route::prefix('tasks')->name('tasks.')->group(function () {

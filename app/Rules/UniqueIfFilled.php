@@ -28,8 +28,8 @@ class UniqueIfFilled implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        // Jika value kosong, skip validasi
-        if (empty($value)) {
+        // Jika value kosong atau strip '-', skip validasi
+        if (empty($value) || trim((string)$value) === '' || trim((string)$value) === '-') {
             return;
         }
 

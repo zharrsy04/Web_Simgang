@@ -249,8 +249,8 @@
                 @enderror
             </div>
 
-            <!-- Kepala Bidang Data -->
-            <h5 class="mt-4 mb-3">Data Kepala Bidang</h5>
+            <!-- Kepala Dinas Data -->
+            <h5 class="mt-4 mb-3">Data Kepala Dinas</h5>
             <div class="col-md-6">
                 <label for="tgl_sertifikat" class="form-label">Tanggal Sertifikat</label>
                 <input type="date" name="tgl_sertifikat" id="tgl_sertifikat" class="form-control"
@@ -273,7 +273,7 @@
                 <label for="sts_kadis" class="form-label">Status Kepala Dinas</label>
                 <select name="sts_kadis" id="sts_kadis" class="form-select" required>
                     <option value="">Pilih Status</option>
-                    <option value="1" {{ old('sts_kadis') == '1' ? 'selected' : '' }}>Definitif</option>
+                    <option value="1" {{ old('sts_kadis', '1') == '1' ? 'selected' : '' }}>Definitif</option>
                     <option value="0" {{ old('sts_kadis') == '0' ? 'selected' : '' }}>Plt</option>
                 </select>
                 @error('sts_kadis')
@@ -282,18 +282,18 @@
             </div>
 
             <div class="col-md-6">
-                <label for="nm_kadis" class="form-label">Nama Kepala Bidang</label>
+                <label for="nm_kadis" class="form-label">Nama Kepala Dinas</label>
                 <input type="text" name="nm_kadis" id="nm_kadis" class="form-control"
-                    value="{{ old('nm_kadis') }}" required>
+                    value="{{ old('nm_kadis', \App\Constants\BidangConstants::KADIS_NAMA) }}" required>
                 @error('nm_kadis')
                     <small class="text-danger">{{ $message }}</small>
                 @enderror
             </div>
 
             <div class="col-md-6">
-                <label for="nip_kadis" class="form-label">NIP Kepala Bidang</label>
+                <label for="nip_kadis" class="form-label">NIP Kepala Dinas</label>
                 <input type="text" name="nip_kadis" id="nip_kadis" class="form-control"
-                    value="{{ old('nip_kadis') }}" required>
+                    value="{{ old('nip_kadis', \App\Constants\BidangConstants::KADIS_NIP) }}" required>
                 @error('nip_kadis')
                     <small class="text-danger">{{ $message }}</small>
                 @enderror
@@ -302,8 +302,7 @@
             <div class="col-md-6">
                 <label for="jabatan_pegawai" class="form-label">Jabatan Pegawai</label>
                 <select name="jabatan_pegawai" id="jabatan_pegawai" class="form-select" required>
-                    <option value="">Pilih Jabatan</option>
-                    <option value="Kepala Dinas Komunikasi dan Informatika" {{ old('jabatan_pegawai') == 'Kepala Dinas Komunikasi dan Informatika' ? 'selected' : '' }}>Kepala Dinas Komunikasi dan Informatika</option>
+                    <option value="Kepala Dinas Komunikasi dan Informatika" {{ old('jabatan_pegawai', 'Kepala Dinas Komunikasi dan Informatika') == 'Kepala Dinas Komunikasi dan Informatika' ? 'selected' : '' }}>Kepala Dinas Komunikasi dan Informatika</option>
                     <option value="Kepala Bidang Informatika" {{ old('jabatan_pegawai') == 'Kepala Bidang Informatika' ? 'selected' : '' }}>Kepala Bidang Informatika</option>
                     <option value="Kepala Bidang Statistik dan Persandian" {{ old('jabatan_pegawai') == 'Kepala Bidang Statistik dan Persandian' ? 'selected' : '' }}>Kepala Bidang Statistik dan Persandian</option>
                     <option value="Kepala Bidang Informasi dan Komunikasi Publik" {{ old('jabatan_pegawai') == 'Kepala Bidang Informasi dan Komunikasi Publik' ? 'selected' : '' }}>Kepala Bidang Informasi dan Komunikasi Publik</option>

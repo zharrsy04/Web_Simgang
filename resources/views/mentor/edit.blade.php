@@ -251,13 +251,8 @@
 
             <!-- Step 3: Data Pembimbing -->
             @php
-                $defaultNmPembimbing = \App\Models\SertifikatPKL::isRealMentorName($sertifikat->nm_pembimbing, $sertifikat->nama_kabid)
-                    ? $sertifikat->nm_pembimbing 
-                    : $sertifikat->pembimbing_lapangan;
-
-                $defaultNikPembimbing = ($sertifikat->nik_pembimbing && trim($sertifikat->nik_pembimbing) !== trim($sertifikat->nip_kabid) && $sertifikat->nik_pembimbing !== '198503232010011028' && $sertifikat->nik_pembimbing !== '-')
-                    ? $sertifikat->nik_pembimbing
-                    : $sertifikat->nip_pembimbing_lapangan;
+                $defaultNmPembimbing = $sertifikat->nm_pembimbing ?: $sertifikat->pembimbing_lapangan;
+                $defaultNikPembimbing = $sertifikat->nik_pembimbing ?: $sertifikat->nip_pembimbing_lapangan;
             @endphp
             <div id="step3" class="form-step" style="display: none;">
                 <div class="card mb-4">
@@ -269,8 +264,8 @@
                             <div class="col-md-4">
                                 <label for="nm_pembimbing" class="form-label">Nama Pembimbing Lapangan <span class="text-danger">*</span></label>
                                 <input type="text" name="nm_pembimbing" id="nm_pembimbing" class="form-control"
-                                    value="{{ old('nm_pembimbing', $defaultNmPembimbing) }}" placeholder="Nama asli pembimbing lapangan (BUKAN Pak Haykel)" required>
-                                <small class="text-muted">Diisi nama Pembimbing Lapangan asli (BUKAN Kepala Bidang).</small>
+                                    value="{{ old('nm_pembimbing', $defaultNmPembimbing) }}" placeholder="Nama pembimbing lapangan" required>
+                                <small class="text-muted">Nama Pembimbing Lapangan siswa.</small>
                                 @error('nm_pembimbing')
                                     <small class="text-danger d-block">{{ $message }}</small>
                                 @enderror
@@ -342,20 +337,11 @@
                 </div>
             </div>
 
-            <!-- Step 4: Data Kepala Bidang -->
-            @php
-                $defaultNmKabid = (!empty($sertifikat->nm_kadis) && !str_contains(strtolower($sertifikat->nm_kadis), 'buddy') && !str_contains(strtolower($sertifikat->nm_kadis), 'supriyanto'))
-                    ? $sertifikat->nm_kadis
-                    : $sertifikat->nama_kabid;
-
-                $defaultNipKabid = (!empty($sertifikat->nip_kadis) && !str_contains($sertifikat->nip_kadis, '19711203') && !str_contains($sertifikat->nip_kadis, '19650825'))
-                    ? $sertifikat->nip_kadis
-                    : $sertifikat->nip_kabid;
-            @endphp
+            <!-- Step 4: Data Kepala Dinas -->
             <div id="step4" class="form-step" style="display: none;">
                 <div class="card mb-4">
                     <div class="card-header">
-                        <h5>Data Kepala Bidang</h5>
+                        <h5>Data Kepala Dinas</h5>
                     </div>
                     <div class="card-body">
                         <div class="row g-3">
@@ -364,7 +350,7 @@
                                 <select name="pejabat_ttd" id="pejabat_ttd" class="form-select" required>
                                     <option value="">Pilih Pejabat</option>
                                     <option value="Kepala Dinas"
-                                        {{ old('pejabat_ttd', $sertifikat->pejabat_ttd) == 'Kepala Dinas'? 'selected' : '' }}>
+                                        {{ old('pejabat_ttd', $sertifikat->pejabat_ttd) == 'Kepala Dinas' || empty($sertifikat->pejabat_ttd) ? 'selected' : '' }}>
                                         Kepala Dinas
                                     </option> 
                                     <option value="Sekretaris Dinas"
@@ -392,10 +378,10 @@
                                 <label for="sts_kadis" class="form-label">Status Pejabat</label>
                                 <select name="sts_kadis" id="sts_kadis" class="form-select" required>
                                     <option value="">Pilih Status</option>
-                                    <option value="1" {{ old('sts_kadis', $sertifikat->sts_kadis) == 1 ? 'selected' : '' }}>
+                                    <option value="1" {{ old('sts_kadis', $sertifikat->sts_kadis) == 1 || is_null($sertifikat->sts_kadis) ? 'selected' : '' }}>
                                         Definitif
                                     </option>
-                                    <option value="0" {{ old('sts_kadis', $sertifikat->sts_kadis) == 0 ? 'selected' : '' }}>
+                                    <option value="0" {{ old('sts_kadis', $sertifikat->sts_kadis) === 0 ? 'selected' : '' }}>
                                         Plt
                                     </option>
                                 </select>
@@ -404,19 +390,20 @@
                                 @enderror
                             </div>
                             <div class="col-md-6">
-                                <label for="nm_kadis" class="form-label">Nama Kepala Bidang <span class="text-danger">*</span></label>
+                                <label for="nm_kadis" class="form-label">Nama Kepala Dinas <span class="text-danger">*</span></label>
                                 <input type="text" name="nm_kadis" id="nm_kadis" class="form-control"
-                                    value="{{ old('nm_kadis', $defaultNmKabid) }}" placeholder="Contoh Informatika: M HAYKEL RAKHMATTULLOH TAUFIQ, S.Kom., M.M." required>
-                                <small class="text-muted">Nama Kepala Bidang (contoh Informatika: M HAYKEL RAKHMATTULLOH TAUFIQ, S.Kom., M.M.).</small>
+                                    value="{{ old('nm_kadis', $sertifikat->nm_kadis ?? \App\Constants\BidangConstants::KADIS_NAMA) }}" required>
+                                <small class="text-muted">Kepala Dinas Komunikasi dan Informatika permanen.</small>
                                 @error('nm_kadis')
                                     <small class="text-danger d-block">{{ $message }}</small>
                                 @enderror
                             </div>
 
                             <div class="col-md-6">
-                                <label for="nip_kadis" class="form-label">NIP Kepala Bidang <span class="text-danger">*</span></label>
+                                <label for="nip_kadis" class="form-label">NIP Kepala Dinas <span class="text-danger">*</span></label>
                                 <input type="text" name="nip_kadis" id="nip_kadis" class="form-control"
-                                    value="{{ old('nip_kadis', $defaultNipKabid) }}" placeholder="NIP Kepala Bidang" required>
+                                    value="{{ old('nip_kadis', $sertifikat->nip_kadis ?? \App\Constants\BidangConstants::KADIS_NIP) }}" required>
+                                <small class="text-muted">NIP Kepala Dinas permanen.</small>
                                 @error('nip_kadis')
                                     <small class="text-danger d-block">{{ $message }}</small>
                                 @enderror
@@ -976,55 +963,6 @@
                             });
                         });
                     }, 100);
-                });
-            }
-
-            // Auto sync data Kepala Bidang saat memilih bidang di Langkah 3
-            const bidangSelect = document.getElementById('bidang');
-            const nmKadisInput = document.getElementById('nm_kadis');
-            const nipKadisInput = document.getElementById('nip_kadis');
-            const pejabatTtdSelect = document.getElementById('pejabat_ttd');
-            const jabatanPegawaiSelect = document.getElementById('jabatan_pegawai');
-            const nmPembimbingInput = document.getElementById('nm_pembimbing');
-
-            const kabidMapping = {
-                'Bidang Informatika': {
-                    nama: 'M HAYKEL RAKHMATTULLOH TAUFIQ, S.Kom., M.M.',
-                    nip: '198503232010011028',
-                    pejabat: 'Kabid Bidang Informatika',
-                    jabatan: 'Kepala Bidang Informatika'
-                },
-                'Bidang Statistik dan Persandian': {
-                    nama: 'Dra. ERNY INDRIYANI, M.M.',
-                    nip: '19680515 199303 2 007',
-                    pejabat: 'Kabid Bidang Statistik dan Persandian',
-                    jabatan: 'Kepala Bidang Statistik dan Persandian'
-                },
-                'Bidang Informasi dan Komunikasi Publik': {
-                    nama: 'ARIS RAKHMANTO, S.Kom.',
-                    nip: '19790618 200501 1 008',
-                    pejabat: 'Kabid Bidang Informasi dan Kepentingan Publik',
-                    jabatan: 'Kepala Bidang Informasi dan Komunikasi Publik'
-                }
-            };
-
-            if (bidangSelect) {
-                bidangSelect.addEventListener('change', function() {
-                    const selected = this.value;
-                    if (kabidMapping[selected]) {
-                        if (nmKadisInput) nmKadisInput.value = kabidMapping[selected].nama;
-                        if (nipKadisInput) nipKadisInput.value = kabidMapping[selected].nip;
-                        if (pejabatTtdSelect) pejabatTtdSelect.value = kabidMapping[selected].pejabat;
-                        if (jabatanPegawaiSelect) jabatanPegawaiSelect.value = kabidMapping[selected].jabatan;
-                    }
-                });
-            }
-
-            if (nmPembimbingInput) {
-                nmPembimbingInput.addEventListener('blur', function() {
-                    if (this.value.toLowerCase().includes('haykel')) {
-                        alert('PERHATIAN: Kolom ini untuk Pembimbing Lapangan asli siswa, BUKAN Kepala Bidang (Pak Haykel). Nama Kepala Bidang diisi pada Langkah 4.');
-                    }
                 });
             }
         });

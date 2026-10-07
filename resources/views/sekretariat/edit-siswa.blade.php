@@ -174,13 +174,8 @@
 
             <!-- Row 6: Mentor Data -->
             @php
-                $defaultNmPembimbing = \App\Models\SertifikatPKL::isRealMentorName($siswa->nm_pembimbing, $siswa->nama_kabid)
-                    ? $siswa->nm_pembimbing 
-                    : $siswa->pembimbing_lapangan;
-
-                $defaultNikPembimbing = ($siswa->nik_pembimbing && trim($siswa->nik_pembimbing) !== trim($siswa->nip_kabid) && $siswa->nik_pembimbing !== '198503232010011028' && $siswa->nik_pembimbing !== '-')
-                    ? $siswa->nik_pembimbing
-                    : $siswa->nip_pembimbing_lapangan;
+                $defaultNmPembimbing = $siswa->nm_pembimbing ?: $siswa->pembimbing_lapangan;
+                $defaultNikPembimbing = $siswa->nik_pembimbing ?: $siswa->nip_pembimbing_lapangan;
 
                 $defaultNmKabid = (!empty($siswa->nm_kadis) && !str_contains(strtolower($siswa->nm_kadis), 'buddy') && !str_contains(strtolower($siswa->nm_kadis), 'supriyanto'))
                     ? $siswa->nm_kadis
@@ -192,8 +187,8 @@
             @endphp
             <div class="col-md-6">
                 <label class="form-label">Nama Pembimbing Lapangan <span class="text-danger">*</span></label>
-                <input type="text" name="nm_pembimbing" class="form-control" value="{{ old('nm_pembimbing', $defaultNmPembimbing) }}" placeholder="Nama asli pembimbing lapangan (BUKAN Pak Haykel)" required>
-                <small class="text-muted">Diisi nama Pembimbing Lapangan asli (BUKAN Kepala Bidang).</small>
+                <input type="text" name="nm_pembimbing" class="form-control" value="{{ old('nm_pembimbing', $defaultNmPembimbing) }}" placeholder="Nama pembimbing lapangan" required>
+                <small class="text-muted">Nama Pembimbing Lapangan siswa.</small>
             </div>
             <div class="col-md-6">
                 <label class="form-label">NIP Pembimbing Lapangan</label>
@@ -213,8 +208,8 @@
                 </select>
             </div>
 
-            <!-- Row 7: Data Kepala Bidang -->
-            <h5 class="mt-4 mb-3">Data Kepala Bidang</h5>
+            <!-- Row 7: Data Kepala Dinas -->
+            <h5 class="mt-4 mb-3">Data Kepala Dinas</h5>
             <div class="col-md-6">
                 <label class="form-label">Tanggal Sertifikat</label>
                 <input type="date" name="tgl_sertifikat" class="form-control" value="{{ old('tgl_sertifikat', $siswa->tgl_sertifikat) }}" required>
@@ -228,18 +223,19 @@
             <div class="col-md-6">
                 <label class="form-label">Status Kepala Dinas</label>
                 <select name="sts_kadis" class="form-select" required>
-                    <option value="1" {{ old('sts_kadis', $siswa->sts_kadis) == 1 ? 'selected' : '' }}>Definitif</option>
-                    <option value="0" {{ old('sts_kadis', $siswa->sts_kadis) == 0 ? 'selected' : '' }}>Plt</option>
+                    <option value="1" {{ old('sts_kadis', $siswa->sts_kadis) == 1 || is_null($siswa->sts_kadis) ? 'selected' : '' }}>Definitif</option>
+                    <option value="0" {{ old('sts_kadis', $siswa->sts_kadis) === 0 ? 'selected' : '' }}>Plt</option>
                 </select>
             </div>
             <div class="col-md-6">
-                <label class="form-label">Nama Kepala Bidang <span class="text-danger">*</span></label>
-                <input type="text" name="nm_kadis" class="form-control" value="{{ old('nm_kadis', $defaultNmKabid) }}" placeholder="Contoh: M HAYKEL RAKHMATTULLOH TAUFIQ, S.Kom., M.M." required>
-                <small class="text-muted">Nama Kepala Bidang (contoh Informatika: M HAYKEL RAKHMATTULLOH TAUFIQ, S.Kom., M.M.).</small>
+                <label class="form-label">Nama Kepala Dinas <span class="text-danger">*</span></label>
+                <input type="text" name="nm_kadis" class="form-control" value="{{ old('nm_kadis', $siswa->nm_kadis ?? \App\Constants\BidangConstants::KADIS_NAMA) }}" required>
+                <small class="text-muted">Kepala Dinas Komunikasi dan Informatika permanen.</small>
             </div>
             <div class="col-md-6">
-                <label class="form-label">NIP Kepala Bidang <span class="text-danger">*</span></label>
-                <input type="text" name="nip_kadis" class="form-control" value="{{ old('nip_kadis', $defaultNipKabid) }}" placeholder="NIP Kepala Bidang" required>
+                <label class="form-label">NIP Kepala Dinas <span class="text-danger">*</span></label>
+                <input type="text" name="nip_kadis" class="form-control" value="{{ old('nip_kadis', $siswa->nip_kadis ?? \App\Constants\BidangConstants::KADIS_NIP) }}" required>
+                <small class="text-muted">NIP Kepala Dinas permanen.</small>
             </div>
             <div class="col-md-6">
                 <label class="form-label">Jabatan Pegawai</label>
