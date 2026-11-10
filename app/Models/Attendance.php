@@ -23,11 +23,19 @@ class Attendance extends Model
      */
     protected $fillable = [
         'id_sertifikat',
+        'mentor_id',
         'date',
         'status',
+        'is_late',
         'location',
+        'latitude',
+        'longitude',
         'notes',
+        'attachment',
         'time',
+        'time_out',
+        'ip_address',
+        'user_agent',
     ];
 
     /**
@@ -38,16 +46,24 @@ class Attendance extends Model
     protected $casts = [
         'date' => 'date:Y-m-d',
         'time' => 'string',
+        'is_late' => 'boolean',
     ];
 
-    // --- Relationship to User ---
-    // Tambahkan relasi ini untuk mendapatkan informasi user yang terkait dengan presensi ini
+    // --- Relationship to User (Siswa by id_sertifikat) ---
     public function user()
     {
         return $this->belongsTo(User::class, 'id_sertifikat', 'id_sertifikat');
-        // Keterangan:
-        // User::class : Nama model induk
-        // 'id_sertifikat' (arg 2): Nama foreign key di tabel 'attendances' (model saat ini)
-        // 'id_sertifikat' (arg 3): Nama local key di tabel 'users' (model induk)
+    }
+
+    // --- Relationship to SertifikatPKL (Data Magang Siswa) ---
+    public function siswa()
+    {
+        return $this->belongsTo(SertifikatPKL::class, 'id_sertifikat', 'id_sertifikat');
+    }
+
+    // --- Relationship to Mentor (User) ---
+    public function mentor()
+    {
+        return $this->belongsTo(User::class, 'mentor_id', 'id');
     }
 }

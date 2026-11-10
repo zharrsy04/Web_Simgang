@@ -96,9 +96,14 @@ Route::middleware(['auth'])->group(function () {
     // Quota Management (Must be defined before /{sertifikat} wildcard to avoid route conflict)
     Route::get('/kuota', [\App\Http\Controllers\LandingCalendarController::class, 'manageQuota'])->name('manage-quota');
 
-    // Absensi Siswa Bimbingan (dinonaktifkan sementara)
-    // Route::get('/absensi-siswa', [\App\Http\Controllers\AttendanceController::class, 'mentorIndex'])->name('absensi.index');
-    // Route::get('/absensi-siswa/{idSertifikat}/riwayat', [\App\Http\Controllers\AttendanceController::class, 'mentorRiwayat'])->name('absensi.riwayat');
+    // Absensi Siswa Bimbingan
+    Route::get('/absensi-siswa', [\App\Http\Controllers\AttendanceController::class, 'mentorIndex'])->name('absensi.index');
+    Route::get('/absensi-siswa/{idSertifikat}/riwayat', [\App\Http\Controllers\AttendanceController::class, 'mentorRiwayat'])->name('absensi.riwayat');
+
+    // Logbook Kegiatan Siswa Bimbingan
+    Route::get('/logbook-siswa', [\App\Http\Controllers\LogbookController::class, 'mentorIndex'])->name('logbook.index');
+    Route::get('/logbook-siswa/{id}', [\App\Http\Controllers\LogbookController::class, 'mentorShow'])->name('logbook.show');
+    Route::post('/logbook-siswa/{id}/review', [\App\Http\Controllers\LogbookController::class, 'mentorReview'])->name('logbook.review');
 
     // CRUD Data Mentor (Mentor & Sekretariat only) - Must be before wildcard routes
     Route::prefix('data-mentor')->name('data-mentor.')->middleware(['roleProtection:mentor,sekretariat'])->group(function () {
@@ -245,10 +250,15 @@ Route::middleware(['auth'])->group(function () {
     // Route untuk portofolio siswa
     Route::get('/portofolio', [\App\Http\Controllers\PortofolioController::class, 'index'])->name('portofolio.index');
 
-    // Route Absensi Harian Siswa (dinonaktifkan sementara)
-    // Route::get('/absensi', [\App\Http\Controllers\AttendanceController::class, 'siswaIndex'])->name('absensi.index');
-    // Route::post('/absensi', [\App\Http\Controllers\AttendanceController::class, 'siswaStore'])->name('absensi.store');
-    // Route::post('/absensi/pulang', [\App\Http\Controllers\AttendanceController::class, 'siswaPulang'])->name('absensi.pulang');
+    // Route Absensi Harian Siswa (Hanya Absen Masuk)
+    Route::get('/absensi', [\App\Http\Controllers\AttendanceController::class, 'siswaIndex'])->name('absensi.index');
+    Route::post('/absensi', [\App\Http\Controllers\AttendanceController::class, 'siswaStore'])->name('absensi.store');
+
+    // Route Logbook Kegiatan Siswa
+    Route::get('/logbook', [\App\Http\Controllers\LogbookController::class, 'siswaIndex'])->name('logbook.index');
+    Route::post('/logbook', [\App\Http\Controllers\LogbookController::class, 'siswaStore'])->name('logbook.store');
+    Route::put('/logbook/{id}', [\App\Http\Controllers\LogbookController::class, 'siswaUpdate'])->name('logbook.update');
+    Route::delete('/logbook/{id}', [\App\Http\Controllers\LogbookController::class, 'siswaDestroy'])->name('logbook.destroy');
 
     // 📌 Tasks siswa
     Route::prefix('tasks')->name('tasks.')->group(function () {

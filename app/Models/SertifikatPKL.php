@@ -555,5 +555,13 @@ class SertifikatPKL extends Model
 
         return '-';
     }
+
+    /**
+     * Relasi ke Logbook Kegiatan Siswa
+     */
+    public function logbooks()
+    {
+        return $this->hasMany(\App\Models\Logbook::class, 'id_sertifikat', 'id_sertifikat');
+    }
 }
 
