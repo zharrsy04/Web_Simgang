@@ -5,7 +5,7 @@
     "keywords": ["laravel", "framework"],
     "license": "MIT",
     "require": {
-        "php": "^8.2",
+        "php": ">=8.2 <8.4",
         "anhskohbo/no-captcha": "^3.8",
         "barryvdh/laravel-dompdf": "^3.1",
         "doctrine/dbal": "^4.3",
@@ -64,6 +64,9 @@
         "allow-plugins": {
             "pestphp/pest-plugin": true,
             "php-http/discovery": true
+        },
+        "platform": {
+            "php": "8.3.26"
         }
     },
     "minimum-stability": "stable",
