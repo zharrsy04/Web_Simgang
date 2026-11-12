@@ -569,6 +569,7 @@
                                 {{ $ex3[2] . ' ' . $bulan[(int) $ex3[1]] . ' ' . $ex3[0] }}, dengan hasil <strong>{{ $predikat }}</strong>.
                             </p>
                             @php
+                                $kabidJabatan = $sertifikat->jabatan_kabid;
                                 $kabidNama = $sertifikat->nama_kabid;
                                 $kabidNip = $sertifikat->nip_kabid;
                                 $kadisNama = $sertifikat->nama_kadis;
@@ -579,7 +580,7 @@
                                 <tr>
                                     <td style="width: 33%;">
                                         <div class="sig-title">
-                                            Kepala Bidang
+                                            {{ $kabidJabatan }}
                                         </div>
                                         <div class="sig-name">{{ $kabidNama }}</div>
                                         <div class="sig-detail">
@@ -716,7 +717,7 @@
                                                 <td style="width: 50%;">
                                                     <div class="sig-title" style="margin-bottom: {{ $sigMarginBottom }};">
                                                         Cilacap, {{ $ex4[2] . ' ' . $bulan[(int) $ex4[1]] . ' ' . $ex4[0] }}<br>
-                                                        Kepala Bidang
+                                                        {{ $kabidJabatan }}
                                                     </div>
                                                     <div class="sig-name">{{ $kabidNama }}</div>
                                                     <div class="sig-detail">NIP. {{ $kabidNip }}</div>

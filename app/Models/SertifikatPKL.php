@@ -31,6 +31,7 @@ class SertifikatPKL extends Model
         'nik_pembimbing',
         'jabatan_pembimbing',
         'jabatan_pegawai',
+        'nip_jabatan_pegawai',
         'bidang',
         'no_sertifikat',
         'nm_kadis',
@@ -372,7 +373,24 @@ class SertifikatPKL extends Model
     }
 
     /**
-     * Accessor untuk nama Kepala Bidang sesuai bidang magang siswa.
+     * Accessor untuk label jabatan penandatangan di sisi kiri bawah sertifikat / daftar nilai.
+     */
+    public function getJabatanKabidAttribute()
+    {
+        if (request()->filled('jabatan_kabid')) {
+            return request('jabatan_kabid');
+        }
+
+        $mapped = BidangConstants::getPenandatanganByJabatan($this->jabatan_pegawai);
+        if ($mapped) {
+            return $mapped['label'];
+        }
+
+        return 'Kepala Bidang';
+    }
+
+    /**
+     * Accessor untuk nama penandatangan di sisi kiri bawah sertifikat sesuai pilihan Jabatan Pegawai.
      */
     public function getNamaKabidAttribute()
     {
@@ -381,7 +399,13 @@ class SertifikatPKL extends Model
             return request('nama_kabid');
         }
 
-        // 2. Cek di tabel unit_kerja berdasarkan bidang siswa
+        // 2. Cek pemetaan berdasarkan Jabatan Pegawai yang dipilih di form
+        $mapped = BidangConstants::getPenandatanganByJabatan($this->jabatan_pegawai);
+        if ($mapped) {
+            return $mapped['nama'];
+        }
+
+        // 3. Fallback untuk data lama: cek di tabel unit_kerja berdasarkan bidang siswa
         $bidang = trim($this->bidang ?? '');
         if (!empty($bidang)) {
             $unitKerja = DB::table('unit_kerja')
@@ -392,13 +416,14 @@ class SertifikatPKL extends Model
             }
         }
 
-        // 3. Fallback pemetaan resmi dari BidangConstants
+        // 4. Fallback pemetaan resmi dari BidangConstants
         $kabidData = BidangConstants::getKabidByBidang($bidang);
         return $kabidData['nama'];
     }
 
     /**
-     * Accessor untuk NIP Kepala Bidang sesuai bidang magang siswa.
+     * Accessor untuk NIP penandatangan di sisi kiri bawah sertifikat.
+     * Mengambil nilai dari input nip_jabatan_pegawai; jika kosong pada jabatan termapping, tampilkan '-'.
      */
     public function getNipKabidAttribute()
     {
@@ -406,6 +431,20 @@ class SertifikatPKL extends Model
             return request('nip_kabid');
         }
 
+        $nipInput = trim($this->nip_jabatan_pegawai ?? '');
+
+        // Jika Jabatan Pegawai termasuk dalam pemetaan khusus, wajib gunakan nip_jabatan_pegawai (atau '-' jika kosong)
+        $mapped = BidangConstants::getPenandatanganByJabatan($this->jabatan_pegawai);
+        if ($mapped) {
+            return !empty($nipInput) ? $nipInput : '-';
+        }
+
+        // Jika NIP diisi manual meskipun jabatan non-mapping
+        if (!empty($nipInput)) {
+            return $nipInput;
+        }
+
+        // Fallback untuk data lama sebelum kolom nip_jabatan_pegawai tersedia
         $bidang = trim($this->bidang ?? '');
         if (!empty($bidang)) {
             $unitKerja = DB::table('unit_kerja')

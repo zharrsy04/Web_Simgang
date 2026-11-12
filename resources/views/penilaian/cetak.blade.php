@@ -304,7 +304,7 @@
                                 </td>
                                 <td style="width: 50%; text-align: center; vertical-align: top;">
                                     <p>Cilacap, <?= $ex4[2] . ' ' . $bulan[(int) $ex4[1]] . ' ' . $ex4[0] ?></p>
-                                    <p>Kepala Bidang</p>
+                                    <p>{{ $sertifikat->jabatan_kabid }}</p>
                                     <br><br><br>
                                     <p style="font-weight: bold; margin-top: 40px;"> 
                                         <span style="text-decoration: underline;">{{ $sertifikat->nama_kabid }}</span><br>

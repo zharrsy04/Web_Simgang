@@ -67,7 +67,7 @@
                 <!-- Signature Section -->
                 <div style="display: flex; justify-content: space-around; margin-top: 60px;">
                     <div style="text-align: center; width: 45%;">
-                        <p style="margin: 0 0 60px 0; color: #333; font-weight: 600;">Kepala Bidang,</p>
+                        <p style="margin: 0 0 60px 0; color: #333; font-weight: 600;">{{ $sertifikat->jabatan_kabid }},</p>
                         <p style="margin: 0; color: #333; font-weight: 600; min-height: 20px;">{{ $sertifikat->nama_kabid }}</p>
                         <p style="margin: 5px 0 0 0; color: #666; font-size: 12px;">NIP. {{ $sertifikat->nip_kabid }}</p>
                     </div>

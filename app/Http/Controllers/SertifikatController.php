@@ -278,6 +278,7 @@ public function dashboard()
             'nm_kadis'            => 'required|string|max:50',
             'nip_kadis'           => 'required|string|max:25',
             'jabatan_pegawai'     => 'required|string|max:100',
+            'nip_jabatan_pegawai' => 'nullable|string|max:50',
             'aprove_pembimbing'   => 'required|integer|in:0,1',
             'approve_kadis'       => 'required|integer|in:0,1',
             'sts_diambil'         => 'required|integer|in:0,1',
@@ -291,6 +292,14 @@ public function dashboard()
             // Convert string kosong menjadi NULL untuk no_sertifikat
             if (empty($validatedData['no_sertifikat'])) {
                 $validatedData['no_sertifikat'] = null;
+            }
+
+            $validatedData['nip_jabatan_pegawai'] = isset($validatedData['nip_jabatan_pegawai']) && trim($validatedData['nip_jabatan_pegawai']) !== ''
+                ? trim($validatedData['nip_jabatan_pegawai'])
+                : null;
+
+            if (!$request->has('nip_jabatan_pegawai') && ($validatedData['jabatan_pegawai'] ?? '') === 'Kepala Bidang Informatika') {
+                $validatedData['nip_jabatan_pegawai'] = '198503232010011028';
             }
 
             $from = $request->input('from');
@@ -404,6 +413,7 @@ public function dashboard()
             'nm_kadis'            => 'required|string|max:50',
             'nip_kadis'           => 'required|string|max:25',
             'jabatan_pegawai'     => 'required|string|max:100',
+            'nip_jabatan_pegawai' => 'nullable|string|max:50',
             'aprove_pembimbing'   => 'required|integer|in:0,1',
             'approve_kadis'       => 'required|integer|in:0,1',
             'sts_diambil'         => 'required|integer|in:0,1',
@@ -417,6 +427,10 @@ public function dashboard()
             if (empty($validatedData['no_sertifikat'])) {
                 $validatedData['no_sertifikat'] = null;
             }
+
+            $validatedData['nip_jabatan_pegawai'] = isset($validatedData['nip_jabatan_pegawai']) && trim($validatedData['nip_jabatan_pegawai']) !== ''
+                ? trim($validatedData['nip_jabatan_pegawai'])
+                : null;
 
             if ($request->filled('instansi_id')) {
                 $validatedData['instansi_id'] = $request->instansi_id;

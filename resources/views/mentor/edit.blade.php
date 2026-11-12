@@ -410,7 +410,7 @@
                             </div>
 
                             <div class="col-md-6">
-                            <label for="jabatan_pegawai" class="form-label">Jabatan Pegawai</label>
+                            <label for="jabatan_pegawai" class="form-label">Kepala Bidang Penempatan</label>
                             <select name="jabatan_pegawai" id="jabatan_pegawai" class="form-select" required>
                                 <option value="">Pilih Jabatan</option>
 
@@ -440,6 +440,17 @@
                                 </option>
                             </select>
                         </div>
+
+                            <div class="col-md-6">
+                                <label for="nip_jabatan_pegawai" class="form-label">NIP Kepala Bidang</label>
+                                <input type="text" name="nip_jabatan_pegawai" id="nip_jabatan_pegawai" class="form-control"
+                                    value="{{ old('nip_jabatan_pegawai', $sertifikat->nip_jabatan_pegawai) }}"
+                                    placeholder="Masukkan NIP Pejabat (opsional)">
+                                <small class="text-muted">Terisi Otomatis untuk Kabid Informatika, Isi Manual Untuk Kabid yang Lainnya.</small>
+                                @error('nip_jabatan_pegawai')
+                                    <small class="text-danger d-block">{{ $message }}</small>
+                                @enderror
+                            </div>
 
                             <div class="col-md-6">
                                 <label for="approve_kadis" class="form-label">Status Persetujuan Pegawai</label>
@@ -963,6 +974,24 @@
                             });
                         });
                     }, 100);
+                });
+            }
+        });
+
+        // ==========================================
+        // AUTO-FILL NIP JABATAN PEGAWAI
+        // ==========================================
+        document.addEventListener('DOMContentLoaded', function() {
+            const jabatanSelect = document.getElementById('jabatan_pegawai');
+            const nipJabatanInput = document.getElementById('nip_jabatan_pegawai');
+
+            if (jabatanSelect && nipJabatanInput) {
+                jabatanSelect.addEventListener('change', function() {
+                    if (this.value === 'Kepala Bidang Informatika') {
+                        nipJabatanInput.value = '198503232010011028';
+                    } else {
+                        nipJabatanInput.value = '';
+                    }
                 });
             }
         });

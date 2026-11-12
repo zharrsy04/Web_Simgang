@@ -612,7 +612,7 @@
                                 <tr>
                                     <td style="width: 33%;">
                                         <div class="sig-title">
-                                            Kepala Bidang
+                                            {{ $sertifikat->jabatan_kabid }}
                                         </div>
                                         <div class="sig-name">{{ $sertifikat->nama_kabid }}</div>
                                         <div class="sig-detail">
@@ -758,7 +758,7 @@
                                             <td style="width: 50%; padding-left: 12px;">
                                                 <div class="sig-title" style="margin-bottom: {{ $sigMarginBottom }};">
                                                     Cilacap, {{ $ex4[2] . ' ' . $bulan[(int) $ex4[1]] . ' ' . $ex4[0] }}<br>
-                                                    Kepala Bidang
+                                                    {{ $sertifikat->jabatan_kabid }}
                                                 </div>
                                                 <div class="sig-name">{{ $sertifikat->nama_kabid }}</div>
                                                 <div class="sig-detail">NIP. {{ $sertifikat->nip_kabid }}</div>

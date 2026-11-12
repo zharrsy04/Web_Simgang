@@ -144,4 +144,33 @@ class BidangConstants
             'pejabat_ttd' => 'Kabid Bidang Informatika',
         ];
     }
+
+    /**
+     * Dapatkan label dan nama penandatangan di sisi kiri bawah sertifikat berdasarkan pilihan Jabatan Pegawai.
+     */
+    public static function getPenandatanganByJabatan(?string $jabatanPegawai): ?array
+    {
+        $jabatan = trim($jabatanPegawai ?? '');
+
+        $mapping = [
+            'Kepala Bidang Informatika' => [
+                'label' => 'Kepala Bidang',
+                'nama' => 'M. HAYKEL RAKHMATULLOH TAUFIQ, S.Kom., M.M.',
+            ],
+            'Kepala Bidang Informasi dan Komunikasi Publik' => [
+                'label' => 'Kepala Bidang',
+                'nama' => 'PRIATMOKO, S.Sos.',
+            ],
+            'Kepala Bidang Statistik dan Persandian' => [
+                'label' => 'Kepala Bidang',
+                'nama' => 'IRPAN SETIAWAN, S.Kom.',
+            ],
+            'Sekretaris Dinas' => [
+                'label' => 'Sekretaris Dinas',
+                'nama' => 'CHAIRIL TAUFAN, S.T.',
+            ],
+        ];
+
+        return $mapping[$jabatan] ?? null;
+    }
 }

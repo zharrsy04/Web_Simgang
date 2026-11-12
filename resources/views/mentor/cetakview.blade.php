@@ -189,7 +189,7 @@
                 <tr>
                     <!-- Kolom Kepala Bidang -->
                     <td style="width: 50%; vertical-align: top;">
-                        Kepala Bidang<br><br><br><br>
+                        {{ $sertifikat->jabatan_kabid }}<br><br><br><br>
                         <span class="signature-name">{{ $sertifikat->nama_kabid }}</span><br>
                         <span class="signature-details">NIP. {{ $sertifikat->nip_kabid }}</span>
                     </td>
